@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from ..models import Ward, TrafficData, AQIReading, PollutionSource, MitigationAction
+from app.models import Ward, TrafficData, AQIReading, PollutionSource, MitigationAction
 
 def generate_mitigations(db: Session):
     """

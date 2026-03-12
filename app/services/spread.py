@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from ..models import Ward
+from app.models import Ward, PollutionSource, AQIReading
 import random
 
 def predict_pollution_spread(db: Session):

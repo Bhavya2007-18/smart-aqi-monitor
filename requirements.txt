@@ -3,3 +3,7 @@ uvicorn
 sqlalchemy
 httpx
 python-dotenv
+aiofiles
+numpy
+scikit-learn
+networkx

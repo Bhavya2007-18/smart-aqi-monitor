@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
-from ..database import get_db
-from ..models import Ward, AQIReading, TrafficData, PollutionSource, MitigationAction
-from ..schemas import (
+from app.database import get_db
+from app.models import Ward, AQIReading, TrafficData, PollutionSource, MitigationAction
+from app.schemas import (
     WardResponse, AQIReadingResponse, TrafficDataResponse, PSourceResponse, 
     MitigationActionResponse, AQIPrediction, HotspotResponse, PollutionEvent,
     HealthRiskResponse, SourceProbabilityResponse, MitigationSimulationRequest,
     MitigationSimulationResponse, WardRanking, PollutionSpreadResponse,
     EmergencyStatusResponse, TrendIntelligenceResponse, CityScoreResponse
 )
-from ..services.prediction import predict_aqi
-from ..services.routing import optimize_routes
-from ..services import analytics, spread, simulator, aqi, traffic, pollution, reinforcement
+from app.services.prediction import predict_aqi
+from app.services.routing import optimize_routes
+from app.services import analytics, spread, simulator, aqi, traffic, pollution, reinforcement
 import os
 from datetime import datetime, timedelta
 
@@ -31,7 +31,7 @@ async def sync_data_background():
         return
     
     _is_syncing = True
-    from ..database import SessionLocal
+    from app.database import SessionLocal
     db = SessionLocal()
     try:
         # These are now wrapped in their own try-except internally

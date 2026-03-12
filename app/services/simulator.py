@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from ..models import Ward, AQIReading
+from app.models import Ward, MitigationAction, AQIReading
 import random
 
 def simulate_mitigation_impact(db: Session, ward_id: int, action: str):

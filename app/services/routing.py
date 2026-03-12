@@ -1,6 +1,6 @@
 import networkx as nx
 from sqlalchemy.orm import Session
-from ..models import Ward, TrafficData
+from app.models import Ward, TrafficData
 
 def optimize_routes(db: Session):
     """

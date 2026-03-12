@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Tex
 from sqlalchemy.orm import relationship
 # Removed geoalchemy2 for SQLite fallback
 # from geoalchemy2 import Geometry
-from .database import Base
+from app.database import Base
 from datetime import datetime
 
 class Ward(Base):

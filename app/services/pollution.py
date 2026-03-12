@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from ..models import Ward, PollutionSource
+from app.models import Ward, PollutionSource
 import random
 
 SOURCES = [

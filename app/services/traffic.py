@@ -3,7 +3,7 @@ import random
 import httpx
 import asyncio
 from sqlalchemy.orm import Session
-from ..models import Ward, TrafficData
+from app.models import Ward, TrafficData
 
 TOMTOM_KEY = os.getenv("TOMTOM_API_KEY")
 

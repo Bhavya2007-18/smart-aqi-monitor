@@ -6,12 +6,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import os
 
-from .database import engine, Base, SessionLocal
-from .api import endpoints, websockets
-from .models import Ward # To ensure tables are created
+from app.database import engine, Base, SessionLocal
+from app.api import endpoints, websockets
+from app.models import Ward # To ensure tables are created
 
 # Core modules
-from .services import traffic, pollution, aqi, reinforcement
+from app.services import traffic, pollution, aqi, reinforcement
 
 # Initialize DB happens in startup_event
 
@@ -35,11 +35,12 @@ app.include_router(endpoints.router, prefix="/api")
 app.include_router(websockets.router, prefix="/ws")
 
 # Serve UI Static Files
-frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend_assets")
+frontend_path = os.path.join(os.path.dirname(__file__), "frontend_assets")
 try:
-    app.mount("/assets", StaticFiles(directory=frontend_path), name="assets")
+    if os.path.exists(frontend_path):
+        app.mount("/assets", StaticFiles(directory=frontend_path), name="assets")
 except Exception:
-    pass # Mount might fail if directory is missing in some environments
+    pass # Mount might fail if directory is missing (unlikely now)
 
 @app.get("/")
 async def read_root():

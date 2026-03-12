@@ -3,7 +3,7 @@ import random
 import httpx
 import asyncio
 from sqlalchemy.orm import Session
-from ..models import Ward, TrafficData, PollutionSource, AQIReading
+from app.models import Ward, TrafficData, PollutionSource, AQIReading
 
 WAQI_TOKEN = os.getenv("WAQI_API_KEY")
 
