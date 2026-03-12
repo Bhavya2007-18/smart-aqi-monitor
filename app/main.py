@@ -15,13 +15,19 @@ from app.services import traffic, pollution, aqi, reinforcement
 
 # Initialize DB happens in startup_event
 
+# Serve UI Static Files
+frontend_path = os.path.join(os.path.dirname(__file__), "frontend_assets")
+
 app = FastAPI(title="Hyper-Local AQI Dashboard Backend")
 
 # Global Exception Handler to prevent 500 screens
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     print(f"CRITICAL ERROR: {exc}")
-    return FileResponse(os.path.join(frontend_path, "dashboard.html"))
+    try:
+        return FileResponse(os.path.join(frontend_path, "dashboard.html"))
+    except Exception:
+        return {"error": "Internal Server Error", "detail": str(exc)}
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,13 +40,11 @@ app.add_middleware(
 app.include_router(endpoints.router, prefix="/api")
 app.include_router(websockets.router, prefix="/ws")
 
-# Serve UI Static Files
-frontend_path = os.path.join(os.path.dirname(__file__), "frontend_assets")
 try:
     if os.path.exists(frontend_path):
         app.mount("/assets", StaticFiles(directory=frontend_path), name="assets")
-except Exception:
-    pass # Mount might fail if directory is missing (unlikely now)
+except Exception as e:
+    print(f"Warning: Static files mount failed: {e}")
 
 @app.get("/")
 async def read_root():
