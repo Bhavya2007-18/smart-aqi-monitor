@@ -65,13 +65,27 @@ async def read_predictions():
 async def read_policy():
     return FileResponse(os.path.join(frontend_path, "policy_engine.html"))
 
-@app.get("/health")
-async def read_health():
+@app.get("/citizen-health")
+async def read_health_html():
     return FileResponse(os.path.join(frontend_path, "citizen_health.html"))
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 
 @app.get("/analytics")
 async def read_analytics():
     return FileResponse(os.path.join(frontend_path, "environmental_analytics.html"))
+
+@app.get("/api/health")
+def api_health():
+    return {"status": "ok"}
+
+@app.get("/health_check")
+def health_check():
+    return {"status": "ok"}
+
 
 # Background Tasks Definition
 async def live_data_loop():

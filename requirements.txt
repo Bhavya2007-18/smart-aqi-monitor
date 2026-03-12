@@ -7,3 +7,5 @@ aiofiles
 numpy
 scikit-learn
 networkx
+requests
+pydantic
