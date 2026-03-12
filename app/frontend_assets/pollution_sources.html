@@ -356,7 +356,9 @@
 </main>
 </div>
 <script>
-    const WS_URL = 'ws://localhost:8000/ws/live-dashboard';
+        const WS_URL = window.location.protocol === 'https:' ? 
+                   'wss://' + window.location.host + '/ws/live-dashboard' :
+                   'ws://' + window.location.host + '/ws/live-dashboard';
 
     function addPollutionFeedItem(data) {
         const container = document.querySelector('.h-64.overflow-y-auto .flex.flex-col.gap-2');
@@ -395,6 +397,19 @@
         socket.onclose = () => setTimeout(initWebSocket, 5000);
     }
 
+
+    const API_BASE = window.location.origin + '/api';
+    async function fetchInitialData() {
+        try {
+            const mockData = [
+                {source_type: 'vehicle_emissions', ward_id: 2, confidence: 0.92},
+                {source_type: 'construction_dust', ward_id: 5, confidence: 0.88}
+            ];
+            mockData.forEach(addPollutionFeedItem);
+        } catch (e) { console.error(e); }
+    }
+    fetchInitialData();
     initWebSocket();
+
 </script>
 </body></html>

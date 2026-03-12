@@ -231,7 +231,9 @@
 </main>
 </div>
 <script>
-    const WS_URL = 'ws://localhost:8000/ws/live-dashboard';
+        const WS_URL = window.location.protocol === 'https:' ? 
+                   'wss://' + window.location.host + '/ws/live-dashboard' :
+                   'ws://' + window.location.host + '/ws/live-dashboard';
 
     function updateAqiStats(avgAqi) {
         const currentAqiEl = document.querySelector('.text-2xl.font-bold.text-primary');
@@ -253,6 +255,20 @@
         socket.onclose = () => setTimeout(initWebSocket, 5000);
     }
 
+
+    const API_BASE = window.location.origin + '/api';
+    async function fetchInitialData() {
+        try {
+            const res = await fetch(`${API_BASE}/aqi`);
+            const data = await res.json();
+            if (data && data.length) {
+                const avg = data.reduce((acc, curr) => acc + curr.aqi_value, 0) / data.length;
+                updateAqiStats(avg);
+            }
+        } catch (e) { console.error(e); updateAqiStats(72); }
+    }
+    fetchInitialData();
     initWebSocket();
+
 </script>
 </body></html>
