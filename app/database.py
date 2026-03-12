@@ -9,7 +9,10 @@ load_dotenv()
 # Assuming docker-compose setup
 # Default to SQLite for local development if no database URL is provided
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{os.path.join(BASE_DIR, '..', 'aqi_dashboard.db')}")
+if os.environ.get("VERCEL"):
+    SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:////tmp/aqi_dashboard.db")
+else:
+    SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{os.path.join(BASE_DIR, '..', 'aqi_dashboard.db')}")
 
 # check_same_thread=False is needed for SQLite with multiple threads/async
 connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}

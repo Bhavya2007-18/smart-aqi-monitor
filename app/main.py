@@ -13,8 +13,7 @@ from .models import Ward # To ensure tables are created
 # Core modules
 from .services import traffic, pollution, aqi, reinforcement
 
-# Initialize DB (creates tables if they don't exist)
-Base.metadata.create_all(bind=engine)
+# Initialize DB happens in startup_event
 
 app = FastAPI(title="Hyper-Local AQI Dashboard Backend")
 
@@ -109,6 +108,9 @@ async def live_data_loop():
 
 @app.on_event("startup")
 async def startup_event():
+    # Initialize DB (creates tables if they don't exist)
+    Base.metadata.create_all(bind=engine)
+    
     # Insert Greater Noida Wards if db is empty
     db = SessionLocal()
     if db.query(Ward).count() == 0:
@@ -129,6 +131,9 @@ async def startup_event():
         db.commit()
     db.close()
     
-    # Start the live data loop in the background
-    asyncio.create_task(live_data_loop())
-    print("Background live data tracking started.")
+    # Start the live data loop in the background (only if not on Vercel)
+    if not os.environ.get("VERCEL"):
+        asyncio.create_task(live_data_loop())
+        print("Background live data tracking started.")
+    else:
+        print("Running in Serverless mode (Vercel). Background tasks disabled.")

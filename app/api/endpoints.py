@@ -11,7 +11,25 @@ from ..schemas import (
 )
 from ..services.prediction import predict_aqi
 from ..services.routing import optimize_routes
-from ..services import analytics, spread, simulator
+from ..services import analytics, spread, simulator, aqi, traffic, pollution, reinforcement
+import os
+from datetime import datetime, timedelta
+
+async def ensure_live_data(db: Session):
+    """
+    On Vercel, background tasks aren't reliable. 
+    This triggers a refresh if the latest data is older than 1 minute.
+    """
+    if not os.environ.get("VERCEL"):
+        return
+
+    latest_aqi = db.query(AQIReading).order_by(AQIReading.timestamp.desc()).first()
+    if not latest_aqi or latest_aqi.timestamp < datetime.utcnow() - timedelta(minutes=1):
+        # Trigger on-demand sync
+        await traffic.update_live_traffic(db)
+        await aqi.update_live_aqi(db)
+        pollution.simulate_pollution_detections(db)
+        reinforcement.generate_mitigations(db)
 
 router = APIRouter()
 
@@ -62,7 +80,8 @@ def get_wards(db: Session = Depends(get_db)):
     return db.query(Ward).all()
 
 @router.get("/aqi", response_model=list[AQIReadingResponse])
-def get_latest_aqi(db: Session = Depends(get_db)):
+async def get_latest_aqi(db: Session = Depends(get_db)):
+    await ensure_live_data(db)
     # Get the latest AQI reading for each ward
     wards = db.query(Ward).all()
     results = []
@@ -73,7 +92,8 @@ def get_latest_aqi(db: Session = Depends(get_db)):
     return results
 
 @router.get("/traffic", response_model=list[TrafficDataResponse])
-def get_latest_traffic(db: Session = Depends(get_db)):
+async def get_latest_traffic(db: Session = Depends(get_db)):
+    await ensure_live_data(db)
     wards = db.query(Ward).all()
     results = []
     for w in wards:
