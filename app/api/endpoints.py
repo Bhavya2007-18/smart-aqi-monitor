@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import Ward, AQIReading, TrafficData, PollutionSource, MitigationAction
@@ -15,21 +15,51 @@ from ..services import analytics, spread, simulator, aqi, traffic, pollution, re
 import os
 from datetime import datetime, timedelta
 
-async def ensure_live_data(db: Session):
-    """
-    On Vercel, background tasks aren't reliable. 
-    This triggers a refresh if the latest data is older than 1 minute.
-    """
-    if not os.environ.get("VERCEL"):
-        return
+import os
+from datetime import datetime, timedelta
 
-    latest_aqi = db.query(AQIReading).order_by(AQIReading.timestamp.desc()).first()
-    if not latest_aqi or latest_aqi.timestamp < datetime.utcnow() - timedelta(minutes=1):
-        # Trigger on-demand sync
+# Global sync lock to prevent concurrent background refreshes
+_is_syncing = False
+
+async def sync_data_background():
+    """
+    Actual sync logic moved to background to avoid Vercel timeouts.
+    Uses a global lock to prevent multiple simultaneous workers.
+    """
+    global _is_syncing
+    if _is_syncing:
+        return
+    
+    _is_syncing = True
+    from ..database import SessionLocal
+    db = SessionLocal()
+    try:
+        # These are now wrapped in their own try-except internally
         await traffic.update_live_traffic(db)
         await aqi.update_live_aqi(db)
         pollution.simulate_pollution_detections(db)
         reinforcement.generate_mitigations(db)
+    except Exception as e:
+        print(f"Background Sync Error: {e}")
+    finally:
+        _is_syncing = False
+        db.close()
+
+def ensure_live_data(db: Session, background_tasks: BackgroundTasks):
+    """
+    Triggers a background refresh if data is stale.
+    """
+    if not os.environ.get("VERCEL"):
+        return
+
+    try:
+        latest_aqi = db.query(AQIReading).order_by(AQIReading.timestamp.desc()).first()
+        # Refresh if no data or data > 3 minutes old
+        if not latest_aqi or latest_aqi.timestamp < datetime.utcnow() - timedelta(minutes=3):
+            background_tasks.add_task(sync_data_background)
+    except Exception:
+        # If DB query fails (e.g. table not ready yet), trigger a sync anyway
+        background_tasks.add_task(sync_data_background)
 
 router = APIRouter()
 
@@ -80,8 +110,8 @@ def get_wards(db: Session = Depends(get_db)):
     return db.query(Ward).all()
 
 @router.get("/aqi", response_model=list[AQIReadingResponse])
-async def get_latest_aqi(db: Session = Depends(get_db)):
-    await ensure_live_data(db)
+async def get_latest_aqi(background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    ensure_live_data(db, background_tasks)
     # Get the latest AQI reading for each ward
     wards = db.query(Ward).all()
     results = []
@@ -92,8 +122,8 @@ async def get_latest_aqi(db: Session = Depends(get_db)):
     return results
 
 @router.get("/traffic", response_model=list[TrafficDataResponse])
-async def get_latest_traffic(db: Session = Depends(get_db)):
-    await ensure_live_data(db)
+async def get_latest_traffic(background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    ensure_live_data(db, background_tasks)
     wards = db.query(Ward).all()
     results = []
     for w in wards:

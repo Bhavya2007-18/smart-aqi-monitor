@@ -17,6 +17,12 @@ from .services import traffic, pollution, aqi, reinforcement
 
 app = FastAPI(title="Hyper-Local AQI Dashboard Backend")
 
+# Global Exception Handler to prevent 500 screens
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    print(f"CRITICAL ERROR: {exc}")
+    return FileResponse(os.path.join(frontend_path, "dashboard.html"))
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -30,11 +36,17 @@ app.include_router(websockets.router, prefix="/ws")
 
 # Serve UI Static Files
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend_assets")
-app.mount("/assets", StaticFiles(directory=frontend_path), name="assets")
+try:
+    app.mount("/assets", StaticFiles(directory=frontend_path), name="assets")
+except Exception:
+    pass # Mount might fail if directory is missing in some environments
 
 @app.get("/")
 async def read_root():
-    return FileResponse(os.path.join(frontend_path, "dashboard.html"))
+    try:
+        return FileResponse(os.path.join(frontend_path, "dashboard.html"))
+    except Exception:
+        return {"status": "ok", "message": "Dashboard loading..."}
 
 @app.get("/pollution")
 async def read_pollution():
@@ -108,28 +120,31 @@ async def live_data_loop():
 
 @app.on_event("startup")
 async def startup_event():
-    # Initialize DB (creates tables if they don't exist)
-    Base.metadata.create_all(bind=engine)
-    
-    # Insert Greater Noida Wards if db is empty
-    db = SessionLocal()
-    if db.query(Ward).count() == 0:
-        wards_data = [
-            {"name": "Knowledge Park III", "lat": 28.4727, "lon": 77.4820},
-            {"name": "Pari Chowk", "lat": 28.4670, "lon": 77.5138},
-            {"name": "Alpha 1", "lat": 28.4789, "lon": 77.5020},
-            {"name": "Omega 1", "lat": 28.4550, "lon": 77.5250},
-            {"name": "Delta 1", "lat": 28.4900, "lon": 77.5150}
-        ]
-        for w in wards_data:
-            db.add(Ward(
-                name=w["name"], 
-                latitude=w["lat"], 
-                longitude=w["lon"],
-                population_density=random.randint(5000, 20000)
-            ))
-        db.commit()
-    db.close()
+    try:
+        # Initialize DB (creates tables if they don't exist)
+        Base.metadata.create_all(bind=engine)
+        
+        # Insert Greater Noida Wards if db is empty
+        db = SessionLocal()
+        if db.query(Ward).count() == 0:
+            wards_data = [
+                {"name": "Knowledge Park III", "lat": 28.4727, "lon": 77.4820},
+                {"name": "Pari Chowk", "lat": 28.4670, "lon": 77.5138},
+                {"name": "Alpha 1", "lat": 28.4789, "lon": 77.5020},
+                {"name": "Omega 1", "lat": 28.4550, "lon": 77.5250},
+                {"name": "Delta 1", "lat": 28.4900, "lon": 77.5150}
+            ]
+            for w in wards_data:
+                db.add(Ward(
+                    name=w["name"], 
+                    latitude=w["lat"], 
+                    longitude=w["lon"],
+                    population_density=random.randint(5000, 20000)
+                ))
+            db.commit()
+        db.close()
+    except Exception as e:
+        print(f"Startup DB Error: {e}")
     
     # Start the live data loop in the background (only if not on Vercel)
     if not os.environ.get("VERCEL"):

@@ -17,7 +17,15 @@ else:
 # check_same_thread=False is needed for SQLite with multiple threads/async
 connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
+# Use NullPool on Vercel to prevent connection leaks in serverless functions
+from sqlalchemy.pool import NullPool
+poolclass = NullPool if os.environ.get("VERCEL") else None
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, 
+    connect_args=connect_args,
+    poolclass=poolclass
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
