@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Environmental Analytics | SmartCity Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#1a120e",
+                        "surface-dark": "#2a1e17",
+                        "accent-pink": "#ff8bcb",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .chart-gradient { fill: url(#chart-fill); }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="w-64 flex-shrink-0 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-primary/10 hidden lg:flex flex-col">
+<div class="p-6 flex flex-col h-full">
+<div class="flex items-center gap-3 mb-10">
+<div class="size-10 rounded-full bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">dataset</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-white text-base font-bold leading-none">SmartCity</h1>
+<p class="text-slate-500 dark:text-primary/70 text-xs font-medium">Command Center</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 flex-grow">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary transition-colors" href="/">
+<span class="material-symbols-outlined text-[22px]">dashboard</span>
+<p class="text-sm font-semibold">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary transition-colors" href="/traffic">
+<span class="material-symbols-outlined text-[22px]">map</span>
+<p class="text-sm font-semibold">Traffic Simulation</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary text-white shadow-lg shadow-primary/20" href="/analytics">
+<span class="material-symbols-outlined text-[22px] fill-1">bar_chart</span>
+<p class="text-sm font-semibold">Analytics</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary transition-colors" href="/health">
+<span class="material-symbols-outlined text-[22px]">notifications</span>
+<p class="text-sm font-semibold">Health Alerts</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary transition-colors mt-auto" href="#">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+<p class="text-sm font-semibold">Settings</p>
+</a>
+</nav>
+<div class="mt-6 pt-6 border-t border-slate-200 dark:border-white/5">
+<button class="w-full flex items-center justify-center gap-2 rounded-xl h-11 bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all font-bold text-sm">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Export Report
+                    </button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-grow flex flex-col min-w-0">
+<!-- Header Section -->
+<header class="p-8 pb-4">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="text-3xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white">Environmental Analytics</h2>
+<p class="text-slate-500 dark:text-slate-400 mt-1 max-w-xl">Hyper-local air quality monitoring and real-time pollution trend visualization across city zones.</p>
+</div>
+<div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+<span class="size-2 rounded-full bg-green-500 animate-pulse"></span>
+                        Live Updates
+                    </div>
+</div>
+</header>
+<div class="p-8 grid grid-cols-12 gap-6">
+<!-- Section 1: City Score Card -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<div class="rounded-2xl p-8 bg-white dark:bg-surface-dark border border-slate-200 dark:border-primary/10 shadow-sm flex flex-col justify-between h-full">
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-semibold mb-1 uppercase tracking-widest">City Pollution Score</p>
+<h3 class="text-primary text-6xl font-black mb-4">62<span class="text-2xl text-slate-400 font-medium">/100</span></h3>
+<div class="flex items-center gap-2 py-1 px-3 rounded-full bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 w-fit text-sm font-bold">
+<span class="material-symbols-outlined text-sm">trending_down</span>
+                                4.2% Improvement
+                            </div>
+</div>
+<div class="mt-8">
+<p class="text-slate-400 dark:text-slate-500 text-xs italic">Score calculated based on PM2.5, PM10, NO2, and CO levels across 48 sensor stations.</p>
+</div>
+</div>
+</div>
+<!-- Section 2: Pollution Trend Chart -->
+<div class="col-span-12 lg:col-span-8">
+<div class="rounded-2xl p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-primary/10 shadow-sm flex flex-col h-full">
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+<div>
+<h4 class="text-slate-900 dark:text-white font-bold text-lg leading-none">AQI Trend Over Time</h4>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Average AQI monitoring for current week</p>
+</div>
+<div class="flex bg-slate-100 dark:bg-background-dark p-1 rounded-lg">
+<button class="px-4 py-1.5 text-xs font-bold rounded-md text-slate-500 dark:text-slate-400">Daily</button>
+<button class="px-4 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-surface-dark text-primary shadow-sm">Weekly</button>
+<button class="px-4 py-1.5 text-xs font-bold rounded-md text-slate-500 dark:text-slate-400">Peak Hours</button>
+</div>
+</div>
+<div class="flex-grow flex flex-col">
+<div class="flex items-baseline gap-2 mb-4">
+<span class="text-3xl font-black text-slate-900 dark:text-white">58 Avg AQI</span>
+<span class="text-slate-500 dark:text-slate-400 text-sm font-medium">Last 7 Days</span>
+</div>
+<div class="relative h-48 w-full mt-2">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 500 150">
+<defs>
+<lineargradient id="chart-fill" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="var(--primary)" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="var(--primary)" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path class="chart-gradient" d="M0,100 C50,80 100,120 150,90 C200,60 250,110 300,70 C350,30 400,60 450,40 L500,20 L500,150 L0,150 Z"></path>
+<path class="text-primary" d="M0,100 C50,80 100,120 150,90 C200,60 250,110 300,70 C350,30 400,60 450,40 L500,20" fill="none" stroke="currentColor" stroke-width="3"></path>
+</svg>
+</div>
+<div class="flex justify-between mt-4 px-2">
+<span class="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Mon</span>
+<span class="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Tue</span>
+<span class="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Wed</span>
+<span class="text-[11px] font-bold text-slate-400 uppercase tracking-tighter text-primary">Thu</span>
+<span class="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Fri</span>
+<span class="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Sat</span>
+<span class="text-[11px] font-bold text-slate-400 uppercase tracking-tighter text-slate-300">Sun</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 3: Top Polluted Wards Table -->
+<div class="col-span-12">
+<div class="rounded-2xl bg-white dark:bg-surface-dark border border-slate-200 dark:border-primary/10 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-white/5 flex flex-wrap items-center justify-between gap-4">
+<div>
+<h4 class="text-slate-900 dark:text-white font-bold text-lg">Top Polluted Wards</h4>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Critical focus areas requiring immediate intervention</p>
+</div>
+<button class="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                                View Full City Report <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-background-dark/50">
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Rank</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ward Name</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">AQI Level</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Primary Pollutant</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Trend</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-white/5">
+<tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 font-bold text-primary">#01</td>
+<td class="px-6 py-4 font-semibold text-slate-900 dark:text-white">Industrial Zone East</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center">
+<span class="w-12 h-8 flex items-center justify-center rounded bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 font-black text-sm">184</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded bg-slate-100 dark:bg-background-dark text-xs font-bold">PM2.5 (High)</span>
+</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-xs font-bold text-red-500 uppercase tracking-tighter">
+<span class="size-1.5 rounded-full bg-red-500"></span> Critical
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="material-symbols-outlined text-red-500">trending_up</span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 font-bold text-primary">#02</td>
+<td class="px-6 py-4 font-semibold text-slate-900 dark:text-white">Central Market Sq.</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center">
+<span class="w-12 h-8 flex items-center justify-center rounded bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-black text-sm">142</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded bg-slate-100 dark:bg-background-dark text-xs font-bold">NO2 (Vehicular)</span>
+</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-xs font-bold text-orange-500 uppercase tracking-tighter">
+<span class="size-1.5 rounded-full bg-orange-500"></span> Warning
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="material-symbols-outlined text-orange-500">trending_flat</span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 font-bold text-primary">#03</td>
+<td class="px-6 py-4 font-semibold text-slate-900 dark:text-white">Harbor Terminal</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center">
+<span class="w-12 h-8 flex items-center justify-center rounded bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-black text-sm">128</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded bg-slate-100 dark:bg-background-dark text-xs font-bold">SO2 (Marine)</span>
+</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-xs font-bold text-orange-500 uppercase tracking-tighter">
+<span class="size-1.5 rounded-full bg-orange-500"></span> Warning
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="material-symbols-outlined text-green-500">trending_down</span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 font-bold text-primary">#04</td>
+<td class="px-6 py-4 font-semibold text-slate-900 dark:text-white">Riverdale Heights</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center">
+<span class="w-12 h-8 flex items-center justify-center rounded bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 font-black text-sm">94</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded bg-slate-100 dark:bg-background-dark text-xs font-bold">PM10 (Dust)</span>
+</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-xs font-bold text-yellow-500 uppercase tracking-tighter">
+<span class="size-1.5 rounded-full bg-yellow-500"></span> Moderate
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="material-symbols-outlined text-red-500">trending_up</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    const WS_URL = 'ws://localhost:8000/ws/live-dashboard';
+
+    function updateCityScore(avgAqi) {
+        const scoreEl = document.querySelector('p.text-5xl.font-black');
+        if (scoreEl) {
+            // Map 0-300 AQI to 0-100 score (roughly)
+            let score = 100 - (avgAqi / 3);
+            if (score < 0) score = 0;
+            scoreEl.textContent = Math.round(score);
+            
+            const statusEl = scoreEl.nextElementSibling;
+            if (statusEl) {
+                if (score > 80) { statusEl.textContent = 'Excellent'; statusEl.className = 'text-green-500 text-sm font-semibold flex items-center gap-1'; }
+                else if (score > 60) { statusEl.textContent = 'Good'; statusEl.className = 'text-green-400 text-sm font-semibold flex items-center gap-1'; }
+                else if (score > 40) { statusEl.textContent = 'Fair'; statusEl.className = 'text-yellow-500 text-sm font-semibold flex items-center gap-1'; }
+                else { statusEl.textContent = 'Critical'; statusEl.className = 'text-red-500 text-sm font-semibold flex items-center gap-1'; }
+            }
+        }
+    }
+
+    function initWebSocket() {
+        const socket = new WebSocket(WS_URL);
+        socket.onopen = () => console.log('Environmental Analytics Connected');
+        socket.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'aqi_update') {
+                const avg = msg.data.reduce((acc, curr) => acc + curr.aqi, 0) / msg.data.length;
+                updateCityScore(avg);
+            }
+        };
+        socket.onclose = () => setTimeout(initWebSocket, 5000);
+    }
+
+    initWebSocket();
+</script>
+</body></html>

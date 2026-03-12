@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hyper-Local AQI &amp; Pollution Mitigation Dashboard</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter for clean sans-serif typography -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg: '#0f172a',
+              panel: '#1e293b',
+              accent: '#38bdf8',
+              good: '#22c55e',
+              moderate: '#eab308',
+              poor: '#f97316',
+              verypoor: '#ef4444',
+              severe: '#a855f7'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-scrollbars">
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #38bdf8;
+    }
+  </style>
+<style data-purpose="glow-effects">
+    .glow-accent {
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+    }
+    .status-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .5; }
+    }
+    .heatmap-layer {
+      background: radial-gradient(circle at 40% 40%, rgba(239, 68, 68, 0.4) 0%, transparent 60%),
+                  radial-gradient(circle at 70% 60%, rgba(249, 115, 22, 0.3) 0%, transparent 50%),
+                  radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.2) 0%, transparent 40%);
+    }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/></head>
+<body class="bg-brand-bg text-slate-200 font-sans overflow-hidden h-screen flex flex-col">
+<!-- BEGIN: Top Navigation -->
+<header class="h-16 border-b border-slate-800 flex items-center justify-between px-6 shrink-0 z-30 bg-brand-bg/95 backdrop-blur-sm" data-purpose="main-header">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 bg-brand-accent rounded flex items-center justify-center shadow-[0_0_10px_rgba(56,189,248,0.5)]">
+<svg class="w-5 h-5 text-slate-900" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<h1 class="font-bold text-lg tracking-tight leading-none">Hyper-Local AQI</h1>
+<span class="text-[10px] text-brand-accent uppercase tracking-widest font-semibold">Smart City Command Center</span>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<!-- Live AQI Tracker -->
+<div class="flex items-center gap-6 border-x border-slate-800 px-8">
+<div class="relative w-12 h-12 flex items-center justify-center">
+<svg class="w-full h-full" viewbox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="16" stroke="#334155" stroke-dasharray="75 25" stroke-linecap="round" stroke-width="3" transform="rotate(135 18 18)"></circle>
+<circle cx="18" cy="18" fill="none" r="16" stroke="#f97316" stroke-dasharray="55 100" stroke-linecap="round" stroke-width="3" transform="rotate(135 18 18)"></circle>
+</svg>
+<span class="absolute text-[10px] font-bold">142</span>
+</div>
+<div class="text-left">
+<p class="text-[10px] text-slate-400 uppercase leading-none">City Average</p>
+<p class="text-sm font-bold text-brand-poor">MODERATE</p>
+</div>
+</div>
+<!-- City Selector -->
+<div class="relative">
+<select class="bg-brand-panel border-slate-700 text-sm rounded-lg focus:ring-brand-accent focus:border-brand-accent block w-48 py-2">
+<option>Central District - Sector 7</option>
+<option>South Park - Ward 12</option>
+<option>Industrial Zone - North</option>
+</select>
+</div>
+<!-- System Status -->
+<button class="mr-4 px-3 py-1.5 bg-brand-accent/10 border border-brand-accent/30 text-brand-accent text-xs font-bold rounded hover:bg-brand-accent hover:text-slate-900 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">fullscreen</span>
+  Command Mode
+</button><div class="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-700">
+<span class="w-2 h-2 bg-green-500 rounded-full status-pulse"></span>
+<span class="text-xs font-medium text-slate-300">System Live</span>
+</div>
+</div>
+</header>
+<!-- END: Top Navigation -->
+<div class="flex flex-1 overflow-hidden">
+<!-- BEGIN: Left Sidebar -->
+<aside class="w-20 border-r border-slate-800 flex flex-col items-center py-6 gap-8 bg-brand-bg shrink-0" data-purpose="side-navigation">
+<nav class="flex flex-col gap-6">
+<button class="p-3 bg-brand-accent text-slate-900 rounded-xl glow-accent transition-all duration-300" title="Dashboard">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<button class="p-3 text-slate-500 hover:text-brand-accent transition-colors" title="Pollution Sources">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<button class="p-3 text-slate-500 hover:text-brand-accent transition-colors" title="Traffic Simulation">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<button class="p-3 text-slate-500 hover:text-brand-accent transition-colors" title="AQI Predictions">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<button class="p-3 text-slate-500 hover:text-brand-accent transition-colors" title="Policy Engine">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<button class="p-3 text-slate-500 hover:text-brand-accent transition-colors" title="Citizen Health Alerts">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</nav>
+<div class="mt-auto mb-4">
+<button class="p-3 text-slate-600 hover:text-slate-400">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.310 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</aside>
+<!-- END: Left Sidebar -->
+<!-- BEGIN: Main Dashboard Content -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<div class="flex-1 flex">
+<!-- BEGIN: Center Map Section -->
+<section class="flex-1 relative bg-[#111827]" data-purpose="map-container">
+<!-- Mock Map UI -->
+<div class="absolute inset-0 heatmap-layer opacity-40"></div>
+<svg class="absolute inset-0 w-full h-full text-slate-800/20" fill="none" stroke="currentColor" stroke-width="1" viewbox="0 0 800 600">
+<path d="M100 100 L200 50 L350 120 L500 80 L700 150 L650 350 L550 500 L300 550 L150 450 Z" stroke-dasharray="4 4"></path>
+<path d="M200 50 L250 250 L350 120" stroke-dasharray="2 2"></path>
+<path d="M350 120 L400 300 L500 80" stroke-dasharray="2 2"></path>
+<!-- Road Networks -->
+<path d="M0 300 Q400 320 800 280" stroke="currentColor" stroke-opacity="0.3" stroke-width="0.5"></path>
+<path d="M400 0 Q380 300 420 600" stroke="currentColor" stroke-opacity="0.3" stroke-width="0.5"></path>
+</svg>
+<!-- Hotspot Markers -->
+<div class="absolute top-[40%] left-[45%] group cursor-pointer">
+<div class="w-12 h-12 bg-brand-verypoor/20 rounded-full flex items-center justify-center animate-ping absolute"></div>
+<div class="w-4 h-4 bg-brand-verypoor rounded-full border-2 border-white relative z-10 shadow-lg"></div>
+</div>
+<div class="absolute top-[25%] left-[20%] group cursor-pointer">
+<div class="w-3 h-3 bg-brand-moderate rounded-full border-2 border-white shadow-lg"></div>
+</div>
+<!-- Ward Details Card (Floating) -->
+<div class="absolute top-8 left-8 w-72 bg-brand-panel/90 backdrop-blur-md p-5 rounded-xl border border-slate-700 shadow-2xl" data-purpose="ward-card">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-bold text-lg">Ward 08</h3>
+<p class="text-[10px] text-slate-400 uppercase tracking-wide">South-West Sector</p>
+</div>
+<div class="bg-brand-verypoor text-white px-2 py-1 rounded text-xs font-bold">POOR</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between border-b border-slate-700 pb-2">
+<span class="text-sm text-slate-400">AQI Level</span>
+<span class="text-xl font-bold text-brand-verypoor">182</span>
+</div>
+<div class="flex justify-between border-b border-slate-700 pb-2">
+<span class="text-sm text-slate-400">Dominant</span>
+<span class="text-sm font-semibold">PM2.5 (High)</span>
+</div>
+<div>
+<span class="text-[10px] text-slate-400 uppercase block mb-2">Nearby Sources</span>
+<div class="flex flex-wrap gap-2">
+<span class="bg-slate-800 text-[10px] px-2 py-1 rounded border border-slate-700">Construction S-2</span>
+<span class="bg-slate-800 text-[10px] px-2 py-1 rounded border border-slate-700">Bus Terminal</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Map Controls -->
+<div class="absolute bottom-8 left-8 flex flex-col gap-2">
+<button class="p-2 bg-brand-panel border border-slate-700 rounded hover:bg-slate-700 transition-colors"><svg class="w-5 h-5" fill="currentColor" viewbox="0 0 20 20"><path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"></path></svg></button>
+<button class="p-2 bg-brand-panel border border-slate-700 rounded hover:bg-slate-700 transition-colors"><svg class="w-5 h-5" fill="currentColor" viewbox="0 0 20 20"><path d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"></path></svg></button>
+</div>
+<!-- Legend -->
+<div class="absolute bottom-8 right-8 bg-brand-panel/80 p-3 rounded-lg border border-slate-700 backdrop-blur-sm">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 text-[10px] font-medium">
+<div class="w-3 h-3 bg-brand-good rounded"></div> <span>0-50 Good</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] font-medium">
+<div class="w-3 h-3 bg-brand-moderate rounded"></div> <span>51-100 Mod</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] font-medium">
+<div class="w-3 h-3 bg-brand-poor rounded"></div> <span>101-150 Poor</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] font-medium">
+<div class="w-3 h-3 bg-brand-verypoor rounded"></div> <span>151+ Svr</span>
+</div>
+</div>
+</div>
+<div class="absolute top-8 right-8 w-64 z-20 pointer-events-none">
+<div class="bg-red-500/10 border border-red-500/50 backdrop-blur-md rounded-lg p-3 shadow-[0_0_20px_rgba(239,68,68,0.2)] animate-pulse mb-2 pointer-events-auto">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-red-500 text-sm">warning</span>
+<span class="text-[10px] font-bold text-red-500 uppercase tracking-widest">Severe Spike</span>
+</div>
+<p class="text-xs font-bold">Ward 04 AQI: 312</p>
+<p class="text-[10px] text-slate-400">Industrial discharge detected</p>
+</div>
+</div><div class="absolute bottom-24 left-1/2 -translate-x-1/2 w-[60%] bg-brand-panel/90 backdrop-blur-md border border-slate-700 rounded-full px-6 py-2 flex items-center gap-4 shadow-2xl z-20">
+<button class="text-brand-accent hover:scale-110 transition-transform"><span class="material-symbols-outlined">play_arrow</span></button>
+<div class="flex-1 h-1 bg-slate-700 rounded-full relative">
+<div class="absolute left-0 top-0 h-full w-2/3 bg-brand-accent rounded-full"></div>
+<div class="absolute left-2/3 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg"></div>
+</div>
+<span class="text-[10px] font-mono text-slate-400">14:00 / 24:00</span>
+</div><svg class="absolute inset-0 w-full h-full pointer-events-none opacity-40" viewbox="0 0 800 600">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="0" refy="3.5">
+<polygon fill="#38bdf8" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<path d="M200 100 Q400 50 600 150" fill="none" marker-end="url(#arrowhead)" stroke="#38bdf8" stroke-dasharray="5,5" stroke-width="2">
+<animate attributename="stroke-dashoffset" dur="3s" from="50" repeatcount="indefinite" to="0"></animate>
+</path>
+<path d="M150 400 Q450 350 750 450" fill="none" marker-end="url(#arrowhead)" stroke="#38bdf8" stroke-dasharray="5,5" stroke-width="2">
+<animate attributename="stroke-dashoffset" dur="4s" from="50" repeatcount="indefinite" to="0"></animate>
+</path>
+<circle cx="450" cy="240" fill="#38bdf8" opacity="0.6" r="2">
+<animate attributename="cx" dur="5s" from="450" repeatcount="indefinite" to="600"></animate>
+<animate attributename="cy" dur="5s" from="240" repeatcount="indefinite" to="200"></animate>
+</circle>
+</svg></section>
+<!-- END: Center Map Section -->
+<!-- BEGIN: Right Sidebar Panels -->
+<aside class="w-96 border-l border-slate-800 flex flex-col p-6 gap-6 bg-brand-bg overflow-y-auto shrink-0" data-purpose="analysis-panels">
+<!-- Pollution Source Detection Card -->
+<div class="bg-brand-panel p-5 rounded-xl border border-slate-700 shadow-lg mb-6">
+<div class="flex justify-between items-center mb-2">
+<h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest">City Enviro Score</h4>
+<span class="text-brand-good text-xs font-bold">+4% ↑</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative w-16 h-16 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#334155" stroke-width="3"></path>
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#22c55e" stroke-dasharray="62, 100" stroke-width="3"></path>
+</svg>
+<span class="absolute text-lg font-bold">62</span>
+</div>
+<div class="flex-1">
+<p class="text-[10px] text-slate-400">Overall city health is moderate but improving due to recent traffic diversions.</p>
+</div>
+</div>
+</div><div class="bg-brand-panel p-5 rounded-xl border border-slate-700 shadow-lg" data-purpose="detection-card">
+<div class="flex items-center justify-between mb-4">
+<h4 class="font-bold text-sm uppercase tracking-wide flex items-center gap-2">
+<svg class="w-4 h-4 text-brand-accent" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                Source Detection
+              </h4>
+<span class="text-[10px] px-2 py-0.5 bg-brand-accent/10 text-brand-accent border border-brand-accent/20 rounded">AI Active</span>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="text-slate-400">Construction Dust</span>
+<span class="text-brand-accent font-mono">0.91</span>
+</div>
+<div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="bg-brand-accent h-full w-[91%] shadow-[0_0_8px_rgba(56,189,248,0.6)]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="text-slate-400">Vehicle Emissions</span>
+<span class="text-brand-accent font-mono">0.87</span>
+</div>
+<div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="bg-brand-accent h-full w-[87%] opacity-80"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="text-slate-400">Open Burning/Smoke</span>
+<span class="text-slate-500 font-mono">0.14</span>
+</div>
+<div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="bg-brand-accent h-full w-[14%] opacity-30"></div>
+</div>
+</div>
+</div>
+</div><div class="bg-brand-panel p-5 rounded-xl border border-slate-700 shadow-lg">
+<h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Top Polluted Wards</h4>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-xs p-2 bg-slate-800/50 rounded">
+<span class="font-medium">Ward 04 (Industrial)</span>
+<span class="text-brand-verypoor font-bold">312</span>
+</div>
+<div class="flex justify-between items-center text-xs p-2 bg-slate-800/50 rounded">
+<span class="font-medium">Ward 08 (Central)</span>
+<span class="text-brand-verypoor font-bold">182</span>
+</div>
+<div class="flex justify-between items-center text-xs p-2 bg-slate-800/50 rounded">
+<span class="font-medium">Ward 12 (South)</span>
+<span class="text-brand-poor font-bold">148</span>
+</div>
+</div>
+</div>
+<!-- Mitigation Recommendations Card -->
+<div class="bg-brand-panel p-5 rounded-xl border border-slate-700 shadow-lg" data-purpose="mitigation-card"><div class="flex justify-between items-center mb-4">
+<h4 class="font-bold text-sm uppercase tracking-wide text-brand-accent">Command Center Actions</h4>
+<span class="text-[10px] text-slate-500 font-mono">Updated 2m ago</span>
+</div>
+<div class="space-y-3">
+<div class="group p-3 bg-slate-800/40 border border-slate-700 rounded-lg hover:border-brand-accent/60 transition-all cursor-pointer relative">
+<div class="absolute top-2 right-2 flex gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+</div>
+<div class="flex gap-3">
+<div class="shrink-0 w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-500">
+<span class="material-symbols-outlined text-sm">traffic</span>
+</div>
+<div>
+<p class="text-xs font-bold text-slate-200">Divert Traffic (Exit 4)</p>
+<p class="text-[10px] text-brand-accent">Impact: -12% PM2.5 in 45m</p>
+<div class="mt-2 flex gap-2">
+<button class="px-2 py-0.5 bg-brand-accent text-slate-900 text-[9px] font-bold rounded">Execute</button>
+<button class="px-2 py-0.5 bg-slate-700 text-[9px] font-bold rounded">Simulate</button>
+</div>
+</div>
+</div>
+</div>
+<div class="p-3 bg-slate-800/40 border border-slate-700 rounded-lg opacity-80">
+<div class="flex gap-3">
+<div class="shrink-0 w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-500">
+<span class="material-symbols-outlined text-sm">block</span>
+</div>
+<div>
+<p class="text-xs font-bold text-slate-200">Pause Site C Construction</p>
+<p class="text-[10px] text-slate-400">Priority: High | Risk: Low</p>
+</div>
+</div>
+</div>
+</div></div>
+<!-- Citizen Health Advisory Card -->
+<div class="bg-brand-panel p-5 rounded-xl border border-slate-700 shadow-lg mb-6">
+<h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Health Impact (Est.)</h4>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-[10px] mb-1">
+<span class="text-slate-400">Pop. Exposure</span>
+<span class="text-slate-200">124k Residents</span>
+</div>
+<div class="h-1 bg-slate-800 rounded-full">
+<div class="h-full bg-brand-verypoor w-3/4 rounded-full"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-slate-800/50 p-2 rounded">
+<p class="text-[9px] text-slate-500 uppercase">Risk Level</p>
+<p class="text-xs font-bold text-brand-poor">Critical</p>
+</div>
+<div class="bg-slate-800/50 p-2 rounded">
+<p class="text-[9px] text-slate-500 uppercase">Emergency Bed Capacity</p>
+<p class="text-xs font-bold text-brand-good">12% Avail.</p>
+</div>
+</div>
+</div>
+</div><div class="bg-brand-panel p-5 rounded-xl border-l-4 border-l-brand-verypoor border-slate-700 shadow-lg mt-auto" data-purpose="health-card">
+<div class="flex items-center gap-2 mb-3">
+<span class="p-1.5 bg-brand-verypoor/20 rounded-full text-brand-verypoor">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</span>
+<h4 class="text-xs font-bold text-brand-verypoor uppercase tracking-tighter">Public Health Alert</h4>
+</div>
+<p class="text-sm font-medium leading-snug text-slate-200">AQI exceeds 180 in South Sector. Advisory: Wear N95 masks, minimize outdoor activity for sensitive groups.</p>
+<button class="w-full mt-4 py-2 border border-brand-verypoor/40 text-brand-verypoor text-xs font-bold rounded hover:bg-brand-verypoor/10 transition-colors">Dispatch Emergency Alert</button>
+</div><div class="bg-brand-panel p-4 rounded-xl border border-slate-700 shadow-lg h-32 flex flex-col mt-4">
+<h4 class="text-[10px] font-bold text-brand-accent uppercase tracking-widest mb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">psychology</span> AI Insights
+  </h4>
+<div class="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+<p class="text-[10px] text-slate-400 border-l-2 border-brand-accent/30 pl-2">Traffic congestion in Ward 6 causing abnormal AQI rise.</p>
+<p class="text-[10px] text-slate-400 border-l-2 border-brand-accent/30 pl-2">Wind shift predicted at 18:00 will disperse Ward 8 smog.</p>
+<p class="text-[10px] text-slate-400 border-l-2 border-brand-accent/30 pl-2">Construction site B idling violations detected via sensor 42.</p>
+</div>
+</div>
+</aside>
+<!-- END: Right Sidebar Panels -->
+</div>
+<!-- BEGIN: Bottom Section - Charts -->
+<section class="h-64 border-t border-slate-800 bg-brand-bg/80 flex p-6 gap-8 overflow-x-auto" data-purpose="charts-section">
+<!-- AQI Trend Line Chart -->
+<div class="flex-1 min-w-[400px] flex flex-col" data-purpose="aqi-line-chart">
+<div class="flex justify-between items-center mb-4">
+<h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest">AQI 24h Trend (Actual vs Pred)</h5>
+<div class="flex gap-4">
+<span class="flex items-center gap-1.5 text-[10px] text-slate-400"><span class="w-2 h-2 rounded-full bg-brand-accent"></span> Actual</span>
+<span class="flex items-center gap-1.5 text-[10px] text-slate-400"><span class="w-2 h-2 rounded-full border border-brand-accent"></span> Predicted</span>
+</div>
+</div>
+<div class="flex-1 relative flex items-end justify-between border-l border-b border-slate-800 pt-2 px-2 pb-1">
+<!-- Mock Line Chart Path -->
+<svg class="absolute inset-0 w-full h-full px-2 pt-2" preserveaspectratio="none" viewbox="0 0 100 100">
+<polyline fill="none" points="0,70 10,65 20,80 30,50 40,40 50,35 60,30 70,25 80,40 90,55 100,60" stroke="#38bdf8" stroke-linecap="round" stroke-width="2"></polyline>
+<polyline fill="none" points="60,30 100,10" stroke="#38bdf8" stroke-dasharray="2 2" stroke-opacity="0.5" stroke-width="1"></polyline>
+<!-- Grid lines -->
+<line stroke="#1e293b" stroke-width="0.5" x1="0" x2="100" y1="20" y2="20"></line>
+<line stroke="#1e293b" stroke-width="0.5" x1="0" x2="100" y1="50" y2="50"></line>
+<line stroke="#1e293b" stroke-width="0.5" x1="0" x2="100" y1="80" y2="80"></line>
+</svg>
+<div class="text-[9px] text-slate-600">00:00</div>
+<div class="text-[9px] text-slate-600">06:00</div>
+<div class="text-[9px] text-slate-600 font-bold text-slate-400">12:00 (Live)</div>
+<div class="text-[9px] text-slate-600">18:00</div>
+<div class="text-[9px] text-slate-600">23:59</div>
+</div>
+</div>
+<!-- Traffic Emission Bar Chart -->
+<div class="flex-1 min-w-[400px] flex flex-col" data-purpose="traffic-bar-chart">
+<h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Traffic Emission vs Standard</h5>
+<div class="flex-1 flex items-end justify-around gap-4 pb-1">
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex justify-center items-end gap-1 h-32">
+<div class="w-4 bg-brand-verypoor h-[90%] rounded-t shadow-[0_0_10px_rgba(239,68,68,0.3)]"></div>
+<div class="w-4 bg-slate-700 h-[40%] rounded-t"></div>
+</div>
+<span class="text-[10px] font-medium truncate w-full text-center">Main Expressway</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex justify-center items-end gap-1 h-32">
+<div class="w-4 bg-brand-poor h-[70%] rounded-t"></div>
+<div class="w-4 bg-slate-700 h-[40%] rounded-t"></div>
+</div>
+<span class="text-[10px] font-medium truncate w-full text-center">Tech Hub Blvd</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex justify-center items-end gap-1 h-32">
+<div class="w-4 bg-brand-moderate h-[45%] rounded-t"></div>
+<div class="w-4 bg-slate-700 h-[40%] rounded-t"></div>
+</div>
+<span class="text-[10px] font-medium truncate w-full text-center">North Ring Rd</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex justify-center items-end gap-1 h-32">
+<div class="w-4 bg-brand-good h-[25%] rounded-t"></div>
+<div class="w-4 bg-slate-700 h-[40%] rounded-t"></div>
+</div>
+<span class="text-[10px] font-medium truncate w-full text-center">Parkside Ave</span>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Bottom Section - Charts -->
+</main>
+<!-- END: Main Dashboard Content -->
+</div>
+</body></html>

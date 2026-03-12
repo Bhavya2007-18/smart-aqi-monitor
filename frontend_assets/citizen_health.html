@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Citizen Health Advisory | City Control</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#1a0f0a",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Public Sans', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(236, 91, 19, 0.05);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(236, 91, 19, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex h-screen overflow-hidden">
+<!-- SideNavBar Component -->
+<aside class="w-72 flex-shrink-0 bg-background-light dark:bg-[#120a07] border-r border-primary/10 flex flex-col justify-between p-6">
+<div class="flex flex-col gap-8">
+<div class="flex items-center gap-3">
+<div class="bg-primary rounded-lg p-2 text-white">
+<span class="material-symbols-outlined">location_city</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">City Control</h1>
+<p class="text-primary text-xs font-semibold uppercase tracking-wider">Admin Console</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors text-slate-600 dark:text-slate-400" href="/">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors text-slate-600 dark:text-slate-400" href="/traffic">
+<span class="material-symbols-outlined">map</span>
+<span class="text-sm font-medium">Traffic Simulation</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/20" href="/health">
+<span class="material-symbols-outlined">health_and_safety</span>
+<span class="text-sm font-medium">Health Advisory</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors text-slate-600 dark:text-slate-400" href="/analytics">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors text-slate-600 dark:text-slate-400" href="/predictions">
+<span class="material-symbols-outlined">notifications</span>
+<span class="text-sm font-medium">AQI Predictions</span>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-4 border-t border-primary/10 pt-6">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+<div class="flex items-center gap-3 px-4">
+<div class="size-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 overflow-hidden">
+<img alt="Admin Profile" data-alt="Close up of a professional portrait avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuwWherRP04_7TLIfzGdLFkIIZHD5j16wkG3NM6ZUfPPS1jg1jwq0Zo7-at-3qVO7pd52qQdG9aAnnghkKbc5Vd1OKMjwTV4rnwr3vWCFCZx4MIvoHjuPAmK6iE92yJaOdD9U7xWVP1vBa5d5FPr7NHxQz3k6ZgVV24V4zqerjkQkDsGGYqyTVxleJdmnXLApLgJCNjkfLTr_6I79uMGCTDpSR2bVsJB5iMDLmUPoMrlWVKSBEOVhV3lk6GihBalols-Mq8__cPydo"/>
+</div>
+<div>
+<p class="text-sm font-bold">Officer Miller</p>
+<p class="text-xs text-slate-500">Security Level A</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark p-8">
+<!-- Header -->
+<header class="flex flex-col gap-2 mb-8">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-sm">emergency_home</span>
+<span class="text-xs font-bold uppercase tracking-widest leading-none">Public Safety Protocol</span>
+</div>
+<h2 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Citizen Health Advisory</h2>
+<p class="text-slate-500 dark:text-slate-400 max-w-2xl">Real-time citizen safety guidance powered by hyper-local atmospheric sensors. Active alerts for the Downtown and Industrial sectors.</p>
+</header>
+<div class="grid grid-cols-12 gap-6">
+<!-- HealthRiskCard Component -->
+<section class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<div class="bg-white dark:bg-[#2a1b14] rounded-xl p-8 border border-primary/20 shadow-xl relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-8xl">warning</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 font-semibold text-sm mb-1 uppercase tracking-tighter">Current Risk Level</p>
+<h3 class="text-5xl font-black text-primary mb-4 leading-none">Severe</h3>
+<div class="flex items-center gap-2 mb-6">
+<span class="bg-red-500/20 text-red-500 text-xs px-2 py-1 rounded font-bold">AQI: 184</span>
+<span class="text-slate-400 text-xs font-medium">Last updated: 2 mins ago</span>
+</div>
+<!-- Progress Bar for severity -->
+<div class="w-full bg-slate-200 dark:bg-slate-800 h-3 rounded-full overflow-hidden flex gap-1 p-0.5 mb-6">
+<div class="h-full w-1/4 bg-green-500 rounded-full opacity-30"></div>
+<div class="h-full w-1/4 bg-yellow-500 rounded-full opacity-30"></div>
+<div class="h-full w-1/4 bg-orange-500 rounded-full opacity-30"></div>
+<div class="h-full w-1/4 bg-red-600 rounded-full shadow-[0_0_10px_rgba(220,38,38,0.5)]"></div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between text-sm">
+<span class="text-slate-500">Ozone (O3)</span>
+<span class="font-bold text-slate-700 dark:text-slate-200">Moderate</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<span class="text-slate-500">Nitrogen Dioxide (NO2)</span>
+<span class="font-bold text-slate-700 dark:text-slate-200">High</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<span class="text-slate-500">Fine Particles (PM2.5)</span>
+<span class="font-bold text-red-500">Critical</span>
+</div>
+</div>
+</div>
+<!-- SensitiveGroupPanel Component -->
+<div class="bg-slate-900 rounded-xl p-6 border border-slate-800 shadow-lg">
+<h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">groups</span>
+                        Sensitive Groups
+                    </h4>
+<div class="space-y-4">
+<div class="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+<span class="material-symbols-outlined text-primary mt-1">child_care</span>
+<div>
+<p class="text-sm font-bold text-white leading-tight">Children &amp; Minors</p>
+<p class="text-xs text-slate-400">Limit all outdoor play. High risk of respiratory inflammation.</p>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+<span class="material-symbols-outlined text-primary mt-1">elderly</span>
+<div>
+<p class="text-sm font-bold text-white leading-tight">Elderly Residents</p>
+<p class="text-xs text-slate-400">Remain indoors. Ensure air purifiers are operating at max capacity.</p>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+<span class="material-symbols-outlined text-primary mt-1">medical_services</span>
+<div>
+<p class="text-sm font-bold text-white leading-tight">Asthma &amp; Respiratory</p>
+<p class="text-xs text-slate-400">Keep emergency medication accessible. Avoid any physical exertion.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- AdvisoryList Component -->
+<section class="col-span-12 lg:col-span-8 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white">Recommended Actions</h3>
+<button class="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
+                        View Detailed Protocol <span class="material-symbols-outlined text-xs">arrow_forward_ios</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Advisory Card 1 -->
+<div class="bg-white dark:bg-[#251711] rounded-xl overflow-hidden border border-slate-200 dark:border-primary/10 hover:border-primary/40 transition-all flex flex-col">
+<div class="h-48 bg-slate-200 dark:bg-slate-800 relative">
+<img alt="Mask Protection" class="w-full h-full object-cover grayscale opacity-60 mix-blend-overlay" data-alt="Close-up of a high-quality N95 respirator mask on a table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSaWt6bFnIsZ1F6B3kS27La6gHo5Z5baVIo39RXpzkkeWZ9djaMkk6-RlkgaDBF1mH8CMrJTROHUWpCsev4numzXKH-F2RQEP6PxM69mj3YU9oz41G8Ffb7a4oRJk-nB9Rpl0GvClcoTybPSiT-AlLlB04DF5PR3CGMPi6OHsQRxdyCa-sgkhqYf1ghNMDfBJoic6KiKSZNSMWYPGoZq9cWpVewfgQjVljLkPFIjbS6DKWK41d-ApxK4dmhe3RvHtXIOs_O0PilQQz"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#251711] to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<span class="bg-primary text-white text-[10px] font-black uppercase px-2 py-1 rounded">Mandatory</span>
+</div>
+</div>
+<div class="p-6">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary">masks</span>
+<h4 class="font-bold text-lg">Wear N95/FFP2 Mask</h4>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                                standard surgical masks are insufficient for current PM2.5 levels. Use certified respirators for all essential outdoor movement.
+                            </p>
+</div>
+</div>
+<!-- Advisory Card 2 -->
+<div class="bg-white dark:bg-[#251711] rounded-xl overflow-hidden border border-slate-200 dark:border-primary/10 hover:border-primary/40 transition-all flex flex-col">
+<div class="h-48 bg-slate-200 dark:bg-slate-800 relative">
+<img alt="Indoor Exercise" class="w-full h-full object-cover grayscale opacity-60 mix-blend-overlay" data-alt="Blurred background of an indoor gym space with workout equipment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZs5OBITzbJ9RrLeqdHh29Ff-5-x7j3R_z251g1bdLiY0AYP9fLdOHgv3l05TwbPBc6zpPGn9xbu00YtHV2c-SdY80zXPlMBqGm3mbme8qr3TQSCCPycj6VUKj7pQPm74fAxtilXYMuJyCwTCznId96JrxL4sdsTchdsnfIOShWXCVsyeK2VgEAzuAPSYB5GwjhtOPCTWOwqaqY6_EnjIr-T1Sr4aLubAMPcqClVgcffzkJ7mksPIpLt65eemO03gHuQebChzz51q-"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#251711] to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<span class="bg-primary text-white text-[10px] font-black uppercase px-2 py-1 rounded">Prohibited</span>
+</div>
+</div>
+<div class="p-6">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary">directions_run</span>
+<h4 class="font-bold text-lg">Halt Outdoor Exercise</h4>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                                High particulate concentration detected in park sectors. Jogging or cycling outdoors will cause significant lung strain today.
+                            </p>
+</div>
+</div>
+<!-- Advisory Card 3 -->
+<div class="bg-white dark:bg-[#251711] rounded-xl overflow-hidden border border-slate-200 dark:border-primary/10 hover:border-primary/40 transition-all flex flex-col">
+<div class="h-48 bg-slate-200 dark:bg-slate-800 relative">
+<img alt="Closed Windows" class="w-full h-full object-cover grayscale opacity-60 mix-blend-overlay" data-alt="Interior view of a modern window frame with daylight filtering through" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGB3iU5BndOAEGDMctJA2-o1EJxi1nH28lctBKncY5oqlCwY_2dgbwIBE2nFmG78b9J6dTVRXgfnQZNJQlHCcKUtS1v644yZF93iVW7QtfWa1oA_lYRoybj1vhnpqy8TIhxqfY6VtqxfYPy7oL9H9Mo9N1qGpB_dMuBxctz5vgcPny99tWDd4PObzVBssgjj21lV6rtk8Bz11EPV4fq4I8G4su3eFkRTwk1tVd9Ut3zO8umTvacWBCzui5Kz1ijkmjy_F14_hdTC59"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#251711] to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<span class="bg-primary/20 text-primary border border-primary/40 text-[10px] font-black uppercase px-2 py-1 rounded">Advisory</span>
+</div>
+</div>
+<div class="p-6">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary">window</span>
+<h4 class="font-bold text-lg">Seal All Windows</h4>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                                Keep all external vents and windows closed. Enable 'Recirculate' mode on HVAC systems and maintain air purifiers at Stage 3.
+                            </p>
+</div>
+</div>
+<!-- Advisory Card 4 -->
+<div class="bg-white dark:bg-[#251711] rounded-xl overflow-hidden border border-slate-200 dark:border-primary/10 hover:border-primary/40 transition-all flex flex-col">
+<div class="h-48 bg-slate-200 dark:bg-slate-800 relative">
+<img alt="Work From Home" class="w-full h-full object-cover grayscale opacity-60 mix-blend-overlay" data-alt="A clean desktop workspace with a laptop and warm lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCiChFgSgiBH4F6l3IUfF2GSEHyiWrdXJVi3i3T1CaizqFfpT3Ba7vcUg7MIzOF27Kzs6D8nCOGfdjePuPJdu8aaD9kqtP9p2kU7utRtiR1DXTLCoDzf_TficPG7ice9c3ny3JupdVf6wfC25E1VXxu07WAy4RMy37XJTxsUKsQiIaDmVvVBbOG4PF56vRciCL7Izb5hixfNf__JEj4uEwZql0VOePYYltR5jByZXYU6RA-Tz47zrfQ8xi38HGJzFk8tbKDfgJtiMn"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#251711] to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<span class="bg-primary/20 text-primary border border-primary/40 text-[10px] font-black uppercase px-2 py-1 rounded">Advisory</span>
+</div>
+</div>
+<div class="p-6">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary">home_work</span>
+<h4 class="font-bold text-lg">Remote Work Suggested</h4>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                                Reduce commute exposure. Employers in the Central District are advised to allow remote operations until AQI levels drop below 150.
+                            </p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Hyper-local Map Preview -->
+<section class="mt-10">
+<div class="bg-white dark:bg-[#1f140f] rounded-xl border border-primary/10 p-4 h-64 relative group cursor-crosshair">
+<div class="absolute inset-0 overflow-hidden rounded-xl opacity-40 group-hover:opacity-60 transition-opacity">
+<img alt="City Map" class="w-full h-full object-cover" data-alt="A stylized dark map of a city grid with glowing hotspots" data-location="New York City" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnGicc8IvioB6M2RvAURGvgPcYMq3nUi9zjwnIFjhFQ4SopzJZFZfUoQj9YoznQ8wl1QRUElEOO2ANhK73OpprjOltyITzJhuy3fzn7aHBO_0rHDYBxOpowUtcwTtXsLvFBaIR8wlHX-LN_9sllEg1VlWdKWYnKXC_dGKLUEEig3CZmued3a8M1mp5i1x2WaQbIBMuFBbN68esUOf-JJdcDXv_fcAdfl2sRYS4J5jDpOh45m2CN2EmQuKfA5YxhPRlhTyJM3kfz0gu"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-r from-[#1a0f0a] via-transparent to-transparent"></div>
+<div class="relative z-10 flex flex-col justify-center h-full max-w-md ml-6">
+<h5 class="text-xl font-bold mb-2">Explore Local Data</h5>
+<p class="text-sm text-slate-400 mb-4">View real-time heatmaps and sensor readings for every block in your neighborhood.</p>
+<button class="w-fit bg-primary hover:bg-primary/80 text-white font-bold py-2 px-6 rounded-lg text-sm transition-colors">
+                        Launch Interactive Map
+                    </button>
+</div>
+<div class="absolute top-4 right-4 z-10">
+<div class="flex items-center gap-2 bg-black/60 backdrop-blur-md p-2 rounded-lg border border-white/10">
+<div class="size-2 bg-red-500 rounded-full animate-pulse"></div>
+<span class="text-[10px] font-bold text-white uppercase tracking-tighter">Live Sensor Feed</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<script>
+    const WS_URL = 'ws://localhost:8000/ws/live-dashboard';
+
+    function updateHealthRisk(avgAqi) {
+        const riskLevel = document.querySelector('h3.text-5xl.font-black');
+        const aqiVal = document.querySelector('.bg-red-500\/20.text-red-500');
+        const updateTime = document.querySelector('.text-slate-400.text-xs.font-medium');
+        
+        if (riskLevel && aqiVal) {
+            let status = 'Good';
+            let colorClass = 'text-green-500';
+            if (avgAqi > 150) { status = 'Severe'; colorClass = 'text-red-600'; }
+            else if (avgAqi > 100) { status = 'Poor'; colorClass = 'text-orange-500'; }
+            else if (avgAqi > 50) { status = 'Moderate'; colorClass = 'text-yellow-500'; }
+            
+            riskLevel.textContent = status;
+            riskLevel.className = `text-5xl font-black ${colorClass} mb-4 leading-none`;
+            aqiVal.textContent = `AQI: ${Math.round(avgAqi)}`;
+            if (updateTime) updateTime.textContent = `Last updated: Just now`;
+        }
+    }
+
+    function initWebSocket() {
+        const socket = new WebSocket(WS_URL);
+        socket.onopen = () => console.log('Health Advisory Connected');
+        socket.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'aqi_update') {
+                const avg = msg.data.reduce((acc, curr) => acc + curr.aqi, 0) / msg.data.length;
+                updateHealthRisk(avg);
+            }
+        };
+        socket.onclose = () => setTimeout(initWebSocket, 5000);
+    }
+
+    initWebSocket();
+</script>
+</body></html>

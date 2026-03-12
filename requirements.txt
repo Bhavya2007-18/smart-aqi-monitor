@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+websockets
+sqlalchemy
+geoalchemy2
+psycopg2-binary
+networkx
+scikit-learn
+pydantic
+pydantic-settings
+asyncpg
