@@ -11,7 +11,10 @@ from app.api import endpoints, websockets
 from app.models import Ward # To ensure tables are created
 
 # Core modules
-from app.services import traffic, pollution, aqi, reinforcement
+import app.services.traffic as traffic
+import app.services.pollution as pollution
+import app.services.aqi as aqi
+import app.services.reinforcement as reinforcement
 
 # Initialize DB happens in startup_event
 

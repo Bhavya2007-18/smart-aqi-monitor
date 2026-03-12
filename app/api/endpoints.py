@@ -11,7 +11,13 @@ from app.schemas import (
 )
 from app.services.prediction import predict_aqi
 from app.services.routing import optimize_routes
-from app.services import analytics, spread, simulator, aqi, traffic, pollution, reinforcement
+import app.services.analytics as analytics
+import app.services.spread as spread
+import app.services.simulator as simulator
+import app.services.aqi as aqi
+import app.services.traffic as traffic
+import app.services.pollution as pollution
+import app.services.reinforcement as reinforcement
 import os
 from datetime import datetime, timedelta
 

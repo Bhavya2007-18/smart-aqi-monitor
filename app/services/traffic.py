@@ -1,6 +1,6 @@
 import os
 import random
-import httpx
+# import httpx (moved to lazy import inside functions)
 import asyncio
 from sqlalchemy.orm import Session
 from app.models import Ward, TrafficData
@@ -17,6 +17,7 @@ async def fetch_ward_traffic(ward: Ward):
             raise ValueError("No keys or coordinates")
 
         # TomTom Flow Segment Data API
+        import httpx
         url = f"https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?key={TOMTOM_KEY}&point={ward.latitude},{ward.longitude}"
         async with httpx.AsyncClient() as client:
             response = await client.get(url, timeout=5.0)

@@ -1,6 +1,6 @@
 import os
 import random
-import httpx
+# import httpx (moved to lazy import)
 import asyncio
 from sqlalchemy.orm import Session
 from app.models import Ward, TrafficData, PollutionSource, AQIReading
@@ -16,6 +16,7 @@ async def fetch_ward_aqi(ward: Ward):
         if not WAQI_TOKEN or not ward.latitude or not ward.longitude:
             return random.uniform(55, 125)
 
+        import httpx
         url = f"https://api.waqi.info/feed/geo:{ward.latitude};{ward.longitude}/?token={WAQI_TOKEN}"
         async with httpx.AsyncClient() as client:
             response = await client.get(url, timeout=5.0)

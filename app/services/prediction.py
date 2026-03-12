@@ -3,15 +3,22 @@ from app.models import Ward, AQIReading
 import datetime
 import random
 
-try:
-    from sklearn.linear_model import LinearRegression
-    import numpy as np
-    _HAS_ML = True
-except ImportError:
-    _HAS_ML = False
-    print("ML Libraries not found, using rule-based simulation.")
+_HAS_ML = None # Lazy check
 
 def predict_aqi(db: Session):
+    global _HAS_ML
+    if _HAS_ML is None:
+        try:
+            import numpy as np
+            from sklearn.linear_model import LinearRegression
+            _HAS_ML = True
+        except ImportError:
+            _HAS_ML = False
+            print("ML Libraries not found, using rule-based simulation.")
+    
+    if _HAS_ML:
+        import numpy as np
+        from sklearn.linear_model import LinearRegression
     """
     Predict AQI for 1h, 2h, and 3h using simple linear regression 
     over recent historical data or a rule-based simulation if data is sparse.

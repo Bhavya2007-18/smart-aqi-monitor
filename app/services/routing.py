@@ -1,4 +1,4 @@
-import networkx as nx
+# import networkx as nx (moved to lazy loading inside function)
 from sqlalchemy.orm import Session
 from app.models import Ward, TrafficData
 
@@ -11,6 +11,7 @@ def optimize_routes(db: Session):
     if not wards or len(wards) < 2:
         return {"routes": "Not enough wards to build a graph."}
 
+    import networkx as nx
     # 1. Build a synthetic graph of wards (simulating neighboring wards)
     G = nx.Graph()
     for w in wards:
