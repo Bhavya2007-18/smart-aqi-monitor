@@ -62,69 +62,73 @@ async def read_analytics():
     return FileResponse(os.path.join(frontend_path, "environmental_analytics.html"))
 
 # Background Tasks Definition
-async def simulate_data_loop():
+async def live_data_loop():
     """
-    Simulation loop to generate synthetic data on schedule.
-    Every 5 seconds: Traffic Data
-    Every 10 seconds: AQI Values & Pollution Detection
-    Dynamic: Mitigation evaluation
+    Background loop to fetch live data or generate realistic simulation.
+    Updates traffic every 30s, AQI and others every 60s.
     """
+    tick = 0
     while True:
         try:
             db = SessionLocal()
             
-            # Update Traffic (Every 5s tick)
-            new_traffic = traffic.simulate_traffic(db)
+            # Update Traffic (Every tick - 30s)
+            new_traffic = await traffic.update_live_traffic(db)
             
             # Broadcast Traffic Updates
             if new_traffic:
                 data = [{"ward_id": t.ward_id, "vehicle_count": t.vehicle_count, "density": t.traffic_density} for t in new_traffic]
                 await websockets.manager.broadcast({"type": "traffic_update", "data": data})
 
-            # Check if it's the 10th second tick by storing loop iteration. For simplicity we just run it every 10s using an internal counter.
-            # Here we just run AQI and Pollution less frequently by awaiting extra 5.
-            await asyncio.sleep(5)
-            
-            # Tick 2: Update AQI, Pollution, Mitigations
-            db = SessionLocal()
-            
-            new_pollution = pollution.simulate_pollution_detections(db)
-            new_aqi = aqi.calculate_aqi(db)
-            new_mitigations = reinforcement.generate_mitigations(db)
-            
-            if new_pollution:
-                data = [{"ward_id": p.ward_id, "source_type": p.source_type, "confidence": p.confidence} for p in new_pollution]
-                await websockets.manager.broadcast({"type": "pollution_update", "data": data})
+            # Every 2nd tick (60s): Update AQI, Pollution, Mitigations
+            if tick % 2 == 0:
+                new_pollution = pollution.simulate_pollution_detections(db)
+                new_aqi = await aqi.update_live_aqi(db)
+                new_mitigations = reinforcement.generate_mitigations(db)
+                
+                if new_pollution:
+                    data = [{"ward_id": p.ward_id, "source_type": p.source_type, "confidence": p.confidence} for p in new_pollution]
+                    await websockets.manager.broadcast({"type": "pollution_update", "data": data})
 
-            # Broadcast Updates
-            if new_aqi:
-                data = [{"ward_id": a.ward_id, "aqi": a.aqi_value} for a in new_aqi]
-                await websockets.manager.broadcast({"type": "aqi_update", "data": data})
+                if new_aqi:
+                    data = [{"ward_id": a.ward_id, "aqi": a.aqi_value} for a in new_aqi]
+                    await websockets.manager.broadcast({"type": "aqi_update", "data": data})
+                    
+                if new_mitigations:
+                    data = [{"ward_id": m.ward_id, "action": m.action_type} for m in new_mitigations]
+                    await websockets.manager.broadcast({"type": "mitigation_alert", "data": data})
                 
-            if new_mitigations:
-                data = [{"ward_id": m.ward_id, "action": m.action_type} for m in new_mitigations]
-                await websockets.manager.broadcast({"type": "mitigation_alert", "data": data})
-                
-            await asyncio.sleep(5)
+            tick += 1
+            await asyncio.sleep(30)
         except Exception as e:
-            print(f"Simulation loop error: {e}")
-            await asyncio.sleep(5)
+            print(f"Live data loop error: {e}")
+            await asyncio.sleep(10)
         finally:
             db.close()
             
 
 @app.on_event("startup")
 async def startup_event():
-    # Insert some dummy wards if db is empty
+    # Insert Greater Noida Wards if db is empty
     db = SessionLocal()
     if db.query(Ward).count() == 0:
-        names = ["Ward 1", "Ward 2", "Ward 3", "Ward 4", "Ward 5"]
-        # Basic insert, without geometry for synthetic data simplicity unless needed
-        for name in names:
-            db.add(Ward(name=name, population_density=random.randint(2000, 15000)))
+        wards_data = [
+            {"name": "Knowledge Park III", "lat": 28.4727, "lon": 77.4820},
+            {"name": "Pari Chowk", "lat": 28.4670, "lon": 77.5138},
+            {"name": "Alpha 1", "lat": 28.4789, "lon": 77.5020},
+            {"name": "Omega 1", "lat": 28.4550, "lon": 77.5250},
+            {"name": "Delta 1", "lat": 28.4900, "lon": 77.5150}
+        ]
+        for w in wards_data:
+            db.add(Ward(
+                name=w["name"], 
+                latitude=w["lat"], 
+                longitude=w["lon"],
+                population_density=random.randint(5000, 20000)
+            ))
         db.commit()
     db.close()
     
-    # Start the simulation loops in the background
-    asyncio.create_task(simulate_data_loop())
-    print("Background simulation started.")
+    # Start the live data loop in the background
+    asyncio.create_task(live_data_loop())
+    print("Background live data tracking started.")

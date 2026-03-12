@@ -1,0 +1,17 @@
+# Credentials
+.env
+
+# Environment
+venv/
+env/
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Database
+aqi_dashboard.db
+
+# Logs
+server_log.txt

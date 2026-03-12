@@ -359,11 +359,13 @@
 
 <script>
     // Configuration
-    const API_BASE = 'http://localhost:8000/api';
-    const WS_URL = 'ws://localhost:8000/ws/live-dashboard';
+    const API_BASE = window.location.origin + '/api';
+    const WS_URL = 'ws://' + window.location.host + '/ws/live-dashboard';
 
     // State
     let currentWards = [];
+    let selectedWardId = null;
+    let aqiHistory = [];
 
     // DOM Elements Updates
     function updateCityAqi(avgAqi) {
@@ -386,28 +388,54 @@
         }
     }
 
-    function updateWardCard(wardData) {
+    function updateWardCard(wardId) {
+        const ward = currentWards.find(w => w.id == wardId);
+        if (!ward) return;
+
         const wardCard = document.querySelector('[data-purpose="ward-card"]');
-        if (wardCard && wardData) {
-            wardCard.querySelector('h3').textContent = wardData.name || `Ward ${wardData.ward_id}`;
+        if (wardCard) {
+            wardCard.querySelector('h3').textContent = ward.name;
             const aqiVal = wardCard.querySelector('.text-brand-verypoor') || wardCard.querySelector('.text-xl.font-bold');
-            if (aqiVal) aqiVal.textContent = Math.round(wardData.aqi);
+            if (aqiVal) {
+                aqiVal.textContent = Math.round(ward.latest_aqi || 0);
+                // Update card color based on AQI
+                const baseClass = "absolute top-8 left-8 w-72 bg-brand-panel/90 backdrop-blur-md p-5 rounded-xl border shadow-2xl transition-colors duration-500 ";
+                let borderColor = "border-slate-700";
+                let statusText = "GOOD";
+                let statusColor = "bg-brand-good";
+
+                if (ward.latest_aqi > 150) { statusText = "SEVERE"; statusColor = "bg-brand-verypoor"; borderColor = "border-brand-verypoor"; }
+                else if (ward.latest_aqi > 100) { statusText = "POOR"; statusColor = "bg-brand-poor"; borderColor = "border-brand-poor"; }
+                else if (ward.latest_aqi > 50) { statusText = "MODERATE"; statusColor = "bg-brand-moderate"; borderColor = "border-brand-moderate"; }
+                
+                wardCard.className = baseClass + borderColor;
+                const badge = wardCard.querySelector('.bg-brand-verypoor, .bg-brand-good, .bg-brand-poor, .bg-brand-moderate');
+                if (badge) {
+                    badge.textContent = statusText;
+                    badge.className = `${statusColor} text-white px-2 py-1 rounded text-xs font-bold`;
+                }
+            }
         }
     }
 
     function updateTrafficChart(data) {
-        // Mocking bar height updates for demo
         const bars = document.querySelectorAll('[data-purpose="traffic-bar-chart"] .w-4.rounded-t:first-child');
         data.forEach((item, index) => {
             if (bars[index]) {
-                bars[index].style.height = `${Math.min(100, item.vehicle_count / 10)}%`;
+                const height = Math.min(100, (item.vehicle_count / 500) * 100);
+                bars[index].style.height = `${height}%`;
+                // Update name if available
+                const nameLabel = bars[index].parentElement.parentElement.querySelector('span');
+                const ward = currentWards.find(w => w.id == item.ward_id);
+                if (nameLabel && ward) nameLabel.textContent = ward.name;
             }
         });
     }
 
-    function addMitigationAlert(action) {
+    function addMitigationAlert(wardId, action) {
         const container = document.querySelector('[data-purpose="mitigation-card"] .space-y-3');
-        if (container) {
+        const ward = currentWards.find(w => w.id == wardId);
+        if (container && ward) {
             const newAlert = document.createElement('div');
             newAlert.className = 'flex gap-3 p-3 bg-brand-accent/10 border border-brand-accent/40 rounded-lg animate-pulse';
             newAlert.innerHTML = `
@@ -415,7 +443,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
                 </div>
                 <div>
-                    <p class="text-xs font-bold text-slate-200">${action}</p>
+                    <p class="text-xs font-bold text-slate-200">${action} (${ward.name})</p>
                     <p class="text-[10px] text-brand-accent">New AI Recommendation</p>
                 </div>
             `;
@@ -428,25 +456,36 @@
     function initWebSocket() {
         const socket = new WebSocket(WS_URL);
 
-        socket.onopen = () => console.log('Connected to AQI Command Center WebSocket');
+        socket.onopen = () => {
+            console.log('Connected to AQI Command Center WebSocket');
+            document.querySelector('.status-pulse').classList.remove('bg-orange-500');
+            document.querySelector('.status-pulse').classList.add('bg-green-500');
+            document.querySelector('.status-pulse').parentElement.querySelector('span:last-child').textContent = 'System Live';
+        };
         
         socket.onmessage = (event) => {
             const msg = JSON.parse(event.data);
-            console.log('WS Update:', msg);
-
+            
             if (msg.type === 'aqi_update') {
                 const avg = msg.data.reduce((acc, curr) => acc + curr.aqi, 0) / msg.data.length;
                 updateCityAqi(avg);
-                if (msg.data.length > 0) updateWardCard(msg.data[0]);
+                msg.data.forEach(item => {
+                    const ward = currentWards.find(w => w.id == item.ward_id);
+                    if (ward) ward.latest_aqi = item.aqi;
+                });
+                if (selectedWardId) updateWardCard(selectedWardId);
             } else if (msg.type === 'traffic_update') {
                 updateTrafficChart(msg.data);
             } else if (msg.type === 'mitigation_alert') {
-                addMitigationAlert(msg.data[0].action);
+                addMitigationAlert(msg.data[0].ward_id, msg.data[0].action);
             }
         };
 
         socket.onclose = () => {
             console.log('WS disconnected. Retrying in 5s...');
+            document.querySelector('.status-pulse').classList.remove('bg-green-500');
+            document.querySelector('.status-pulse').classList.add('bg-orange-500');
+            document.querySelector('.status-pulse').parentElement.querySelector('span:last-child').textContent = 'Reconnecting...';
             setTimeout(initWebSocket, 5000);
         };
     }
@@ -456,12 +495,19 @@
         try {
             const response = await fetch(`${API_BASE}/wards`);
             currentWards = await response.json();
-            console.log('Initial Wards:', currentWards);
             
             // Populate selector
             const selector = document.querySelector('select');
             if (selector) {
                 selector.innerHTML = currentWards.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+                selector.addEventListener('change', (e) => {
+                    selectedWardId = e.target.value;
+                    updateWardCard(selectedWardId);
+                });
+                if (currentWards.length > 0) {
+                    selectedWardId = currentWards[0].id;
+                    updateWardCard(selectedWardId);
+                }
             }
         } catch (err) {
             console.error('Failed to fetch initial data:', err);
