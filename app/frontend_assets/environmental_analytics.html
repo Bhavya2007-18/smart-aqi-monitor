@@ -98,8 +98,8 @@
 <div class="rounded-2xl p-8 bg-white dark:bg-surface-dark border border-slate-200 dark:border-primary/10 shadow-sm flex flex-col justify-between h-full">
 <div>
 <p class="text-slate-500 dark:text-slate-400 text-sm font-semibold mb-1 uppercase tracking-widest">City Pollution Score</p>
-<h3 class="text-primary text-6xl font-black mb-4">62<span class="text-2xl text-slate-400 font-medium">/100</span></h3>
-<div class="flex items-center gap-2 py-1 px-3 rounded-full bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 w-fit text-sm font-bold">
+<h3 class="text-primary text-6xl font-black mb-4"><span id="city-score-value">62</span><span class="text-2xl text-slate-400 font-medium">/100</span></h3>
+<div id="city-score-status" class="flex items-center gap-2 py-1 px-3 rounded-full bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 w-fit text-sm font-bold">
 <span class="material-symbols-outlined text-sm">trending_down</span>
                                 4.2% Improvement
                             </div>
@@ -271,19 +271,19 @@
                    'ws://' + window.location.host + '/ws/live-dashboard';
 
     function updateCityScore(avgAqi) {
-        const scoreEl = document.querySelector('p.text-5xl.font-black');
+        const scoreEl = document.getElementById('city-score-value');
         if (scoreEl) {
             // Map 0-300 AQI to 0-100 score (roughly)
             let score = 100 - (avgAqi / 3);
             if (score < 0) score = 0;
             scoreEl.textContent = Math.round(score);
             
-            const statusEl = scoreEl.nextElementSibling;
+            const statusEl = document.getElementById('city-score-status');
             if (statusEl) {
-                if (score > 80) { statusEl.textContent = 'Excellent'; statusEl.className = 'text-green-500 text-sm font-semibold flex items-center gap-1'; }
-                else if (score > 60) { statusEl.textContent = 'Good'; statusEl.className = 'text-green-400 text-sm font-semibold flex items-center gap-1'; }
-                else if (score > 40) { statusEl.textContent = 'Fair'; statusEl.className = 'text-yellow-500 text-sm font-semibold flex items-center gap-1'; }
-                else { statusEl.textContent = 'Critical'; statusEl.className = 'text-red-500 text-sm font-semibold flex items-center gap-1'; }
+                if (score > 80) { statusEl.innerHTML = `<span class="material-symbols-outlined text-sm">trending_up</span> Excellent`; statusEl.className = 'flex items-center gap-2 py-1 px-3 rounded-full bg-green-100 text-green-600 w-fit text-sm font-bold'; }
+                else if (score > 60) { statusEl.innerHTML = `<span class="material-symbols-outlined text-sm">trending_up</span> Good`; statusEl.className = 'flex items-center gap-2 py-1 px-3 rounded-full bg-green-100 text-green-500 w-fit text-sm font-bold'; }
+                else if (score > 40) { statusEl.innerHTML = `<span class="material-symbols-outlined text-sm">trending_flat</span> Fair`; statusEl.className = 'flex items-center gap-2 py-1 px-3 rounded-full bg-yellow-100 text-yellow-600 w-fit text-sm font-bold'; }
+                else { statusEl.innerHTML = `<span class="material-symbols-outlined text-sm">trending_down</span> Critical`; statusEl.className = 'flex items-center gap-2 py-1 px-3 rounded-full bg-red-100 text-red-600 w-fit text-sm font-bold'; }
             }
         }
     }

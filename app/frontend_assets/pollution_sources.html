@@ -287,7 +287,7 @@
 <span class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Auto-updating every 5s</span>
 </div>
 <div class="h-64 overflow-y-auto p-2 scrollbar-hide">
-<div class="flex flex-col gap-2">
+<div id="pollution-feed-container" class="flex flex-col gap-2">
 <!-- Feed Item 1 -->
 <div class="flex items-center justify-between p-4 bg-slate-800/40 rounded-lg border border-slate-700/30 hover:bg-slate-800 transition-all">
 <div class="flex items-center gap-4">
@@ -361,7 +361,7 @@
                    'ws://' + window.location.host + '/ws/live-dashboard';
 
     function addPollutionFeedItem(data) {
-        const container = document.querySelector('.h-64.overflow-y-auto .flex.flex-col.gap-2');
+        const container = document.getElementById('pollution-feed-container');
         if (container) {
             const time = new Date().toLocaleTimeString();
             const newItem = document.createElement('div');

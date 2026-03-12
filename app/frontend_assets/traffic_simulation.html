@@ -111,7 +111,7 @@
 <span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">directions_car</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span class="text-3xl font-bold">12,480</span>
+<span id="traffic-vehicle-count" class="text-3xl font-bold">12,480</span>
 <span class="text-emerald-500 text-sm font-bold flex items-center">
 <span class="material-symbols-outlined text-xs">arrow_upward</span>5.2%
                             </span>
@@ -137,7 +137,7 @@
 <span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">grid_view</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span class="text-3xl font-bold">62%</span>
+<span id="traffic-congestion-level" class="text-3xl font-bold">62%</span>
 <span class="text-rose-500 text-sm font-bold flex items-center">
 <span class="material-symbols-outlined text-xs">arrow_upward</span>12.4%
                             </span>
@@ -152,7 +152,7 @@
 <span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">co2</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span class="text-3xl font-bold">142 <span class="text-sm font-normal text-slate-400">AQI</span></span>
+<span id="traffic-emission-index" class="text-3xl font-bold">142 <span class="text-sm font-normal text-slate-400">AQI</span></span>
 <span class="text-rose-500 text-sm font-bold flex items-center">
 <span class="material-symbols-outlined text-xs">arrow_downward</span>3.8%
                             </span>
@@ -336,22 +336,22 @@
         const totalVehicles = data.reduce((acc, curr) => acc + curr.vehicle_count, 0);
         const avgDensity = data.reduce((acc, curr) => acc + curr.density, 0) / data.length;
 
-        const vehicleEl = document.querySelectorAll('p.text-4xl.font-black')[0];
-        const congestionEl = document.querySelectorAll('p.text-4xl.font-black')[2];
-        const emissionEl = document.querySelectorAll('p.text-4xl.font-black')[3];
+        const vehicleEl = document.getElementById('traffic-vehicle-count');
+        const congestionEl = document.getElementById('traffic-congestion-level');
+        const emissionEl = document.getElementById('traffic-emission-index');
 
         if (vehicleEl) vehicleEl.textContent = totalVehicles.toLocaleString();
         if (congestionEl) {
             let level = 'Low';
             let color = 'text-green-500';
-            if (avgDensity > 0.7) { level = 'Critical'; color = 'text-red-600'; }
+            if (avgDensity > 0.7) { level = 'Critical'; color = 'text-red-500'; }
             else if (avgDensity > 0.4) { level = 'Medium'; color = 'text-orange-500'; }
             congestionEl.textContent = level;
-            congestionEl.className = `text-4xl font-black ${color} tracking-tighter`;
+            congestionEl.className = `text-3xl font-bold ${color}`;
         }
         if (emissionEl) {
             const index = Math.round(avgDensity * 100);
-            emissionEl.textContent = index;
+            emissionEl.innerHTML = `${index} <span class="text-sm font-normal text-slate-400">AQI</span>`;
         }
     }
 

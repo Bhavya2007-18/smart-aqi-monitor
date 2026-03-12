@@ -95,7 +95,7 @@
 <div>
 <h3 class="text-lg font-bold text-slate-900 dark:text-white">AQI Forecast: Next 3 Hours</h3>
 <div class="flex items-center gap-2 mt-1">
-<span class="text-2xl font-bold text-primary">72 AQI</span>
+<span id="predicted-aqi-value" class="text-2xl font-bold text-primary">72 AQI</span>
 <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 flex items-center gap-1">
 <span class="material-symbols-outlined text-xs">arrow_upward</span>
                                         +12% Trend
@@ -236,7 +236,7 @@
                    'ws://' + window.location.host + '/ws/live-dashboard';
 
     function updateAqiStats(avgAqi) {
-        const currentAqiEl = document.querySelector('.text-2xl.font-bold.text-primary');
+        const currentAqiEl = document.getElementById('predicted-aqi-value');
         if (currentAqiEl) {
             currentAqiEl.textContent = `${Math.round(avgAqi)} AQI`;
         }

@@ -84,10 +84,10 @@
 <div class="flex items-center gap-3 border-x border-slate-800 px-6">
 <div class="text-right">
 <p class="text-[10px] text-slate-400 uppercase">Avg. City AQI</p>
-<p class="text-xl font-bold text-brand-moderate">142 <span class="text-xs font-medium text-slate-500 ml-1">Moderate</span></p>
+<p id="header-city-aqi" class="text-xl font-bold text-brand-moderate">142 <span class="text-xs font-medium text-slate-500 ml-1">Moderate</span></p>
 </div>
 <div class="w-2 h-10 bg-slate-800 rounded-full overflow-hidden flex flex-col-reverse">
-<div class="bg-brand-moderate w-full h-[60%]"></div>
+<div id="header-city-progress" class="bg-brand-moderate w-full h-[60%]"></div>
 </div>
 </div>
 <!-- City Selector -->
@@ -160,18 +160,18 @@
 <div class="w-3 h-3 bg-brand-moderate rounded-full border-2 border-white shadow-lg"></div>
 </div>
 <!-- Ward Details Card (Floating) -->
-<div class="absolute top-8 left-8 w-72 bg-brand-panel/90 backdrop-blur-md p-5 rounded-xl border border-slate-700 shadow-2xl" data-purpose="ward-card">
+<div id="ward-card" class="absolute top-8 left-8 w-72 bg-brand-panel/90 backdrop-blur-md p-5 rounded-xl border border-slate-700 shadow-2xl" data-purpose="ward-card">
 <div class="flex justify-between items-start mb-4">
 <div>
-<h3 class="font-bold text-lg">Ward 08</h3>
+<h3 id="ward-card-name" class="font-bold text-lg">Ward 08</h3>
 <p class="text-[10px] text-slate-400 uppercase tracking-wide">South-West Sector</p>
 </div>
-<div class="bg-brand-verypoor text-white px-2 py-1 rounded text-xs font-bold">POOR</div>
+<div id="ward-card-badge" class="bg-brand-verypoor text-white px-2 py-1 rounded text-xs font-bold">POOR</div>
 </div>
 <div class="space-y-4">
 <div class="flex justify-between border-b border-slate-700 pb-2">
 <span class="text-sm text-slate-400">AQI Level</span>
-<span class="text-xl font-bold text-brand-verypoor">182</span>
+<span id="ward-card-aqi" class="text-xl font-bold text-brand-verypoor">182</span>
 </div>
 <div class="flex justify-between border-b border-slate-700 pb-2">
 <span class="text-sm text-slate-400">Dominant</span>
@@ -254,7 +254,7 @@
 <!-- Mitigation Recommendations Card -->
 <div class="bg-brand-panel p-5 rounded-xl border border-slate-700 shadow-lg" data-purpose="mitigation-card">
 <h4 class="font-bold text-sm uppercase tracking-wide mb-4 text-brand-accent">Mitigation Actions</h4>
-<div class="space-y-3">
+<div id="mitigation-alerts-container" class="space-y-3">
 <div class="flex gap-3 p-3 bg-slate-800/40 border border-slate-700 rounded-lg hover:border-brand-accent/40 transition-colors cursor-pointer">
 <div class="shrink-0 w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-500">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
@@ -323,28 +323,28 @@
 <div class="flex-1 flex items-end justify-around gap-4 pb-1">
 <div class="flex-1 flex flex-col items-center gap-2">
 <div class="w-full flex justify-center items-end gap-1 h-32">
-<div class="w-4 bg-brand-verypoor h-[90%] rounded-t shadow-[0_0_10px_rgba(239,68,68,0.3)]"></div>
+<div class="w-4 bg-brand-verypoor h-[90%] rounded-t shadow-[0_0_10px_rgba(239,68,68,0.3)] traffic-bar"></div>
 <div class="w-4 bg-slate-700 h-[40%] rounded-t"></div>
 </div>
 <span class="text-[10px] font-medium truncate w-full text-center">Main Expressway</span>
 </div>
 <div class="flex-1 flex flex-col items-center gap-2">
 <div class="w-full flex justify-center items-end gap-1 h-32">
-<div class="w-4 bg-brand-poor h-[70%] rounded-t"></div>
+<div class="w-4 bg-brand-poor h-[70%] rounded-t traffic-bar"></div>
 <div class="w-4 bg-slate-700 h-[40%] rounded-t"></div>
 </div>
 <span class="text-[10px] font-medium truncate w-full text-center">Tech Hub Blvd</span>
 </div>
 <div class="flex-1 flex flex-col items-center gap-2">
 <div class="w-full flex justify-center items-end gap-1 h-32">
-<div class="w-4 bg-brand-moderate h-[45%] rounded-t"></div>
+<div class="w-4 bg-brand-moderate h-[45%] rounded-t traffic-bar"></div>
 <div class="w-4 bg-slate-700 h-[40%] rounded-t"></div>
 </div>
 <span class="text-[10px] font-medium truncate w-full text-center">North Ring Rd</span>
 </div>
 <div class="flex-1 flex flex-col items-center gap-2">
 <div class="w-full flex justify-center items-end gap-1 h-32">
-<div class="w-4 bg-brand-good h-[25%] rounded-t"></div>
+<div class="w-4 bg-brand-good h-[25%] rounded-t traffic-bar"></div>
 <div class="w-4 bg-slate-700 h-[40%] rounded-t"></div>
 </div>
 <span class="text-[10px] font-medium truncate w-full text-center">Parkside Ave</span>
@@ -369,7 +369,7 @@
 
     // DOM Elements Updates
     function updateCityAqi(avgAqi) {
-        const aqiContainer = document.querySelector('header .text-xl.font-bold');
+        const aqiContainer = document.getElementById('header-city-aqi');
         if (aqiContainer) {
             let status = 'Good';
             let colorClass = 'text-brand-good';
@@ -380,7 +380,7 @@
             aqiContainer.innerHTML = `${Math.round(avgAqi)} <span class="text-xs font-medium text-slate-500 ml-1">${status}</span>`;
             aqiContainer.className = `text-xl font-bold ${colorClass}`;
             
-            const progress = document.querySelector('header .bg-brand-moderate');
+            const progress = document.getElementById('header-city-progress');
             if (progress) {
                 progress.style.height = `${Math.min(100, (avgAqi / 200) * 100)}%`;
                 progress.className = `w-full ${colorClass.replace('text-', 'bg-')}`;
@@ -392,10 +392,10 @@
         const ward = currentWards.find(w => w.id == wardId);
         if (!ward) return;
 
-        const wardCard = document.querySelector('[data-purpose="ward-card"]');
+        const wardCard = document.getElementById('ward-card');
         if (wardCard) {
-            wardCard.querySelector('h3').textContent = ward.name;
-            const aqiVal = wardCard.querySelector('.text-brand-verypoor') || wardCard.querySelector('.text-xl.font-bold');
+            document.getElementById('ward-card-name').textContent = ward.name;
+            const aqiVal = document.getElementById('ward-card-aqi');
             if (aqiVal) {
                 aqiVal.textContent = Math.round(ward.latest_aqi || 0);
                 // Update card color based on AQI
@@ -409,7 +409,7 @@
                 else if (ward.latest_aqi > 50) { statusText = "MODERATE"; statusColor = "bg-brand-moderate"; borderColor = "border-brand-moderate"; }
                 
                 wardCard.className = baseClass + borderColor;
-                const badge = wardCard.querySelector('.bg-brand-verypoor, .bg-brand-good, .bg-brand-poor, .bg-brand-moderate');
+                const badge = document.getElementById('ward-card-badge');
                 if (badge) {
                     badge.textContent = statusText;
                     badge.className = `${statusColor} text-white px-2 py-1 rounded text-xs font-bold`;
@@ -419,7 +419,7 @@
     }
 
     function updateTrafficChart(data) {
-        const bars = document.querySelectorAll('[data-purpose="traffic-bar-chart"] .w-4.rounded-t:first-child');
+        const bars = document.querySelectorAll('.traffic-bar');
         data.forEach((item, index) => {
             if (bars[index]) {
                 const height = Math.min(100, (item.vehicle_count / 500) * 100);
@@ -433,7 +433,7 @@
     }
 
     function addMitigationAlert(wardId, action) {
-        const container = document.querySelector('[data-purpose="mitigation-card"] .space-y-3');
+        const container = document.getElementById('mitigation-alerts-container');
         const ward = currentWards.find(w => w.id == wardId);
         if (container && ward) {
             const newAlert = document.createElement('div');
