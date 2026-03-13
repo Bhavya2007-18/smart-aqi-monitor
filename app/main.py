@@ -10,6 +10,7 @@ from fastapi.responses import FileResponse
 from app.database import engine, Base, SessionLocal
 from app.models import Ward
 from app.api import endpoints
+from app.api import websockets
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -63,6 +64,7 @@ app.add_middleware(
 
 # API routes
 app.include_router(endpoints.router, prefix="/api")
+app.include_router(websockets.router, prefix="/ws")
 
 # Static files and frontend hosting
 static_path = os.path.join(os.path.dirname(__file__), "frontend_assets")
