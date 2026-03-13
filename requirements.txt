@@ -4,8 +4,7 @@ sqlalchemy
 httpx
 python-dotenv
 aiofiles
-numpy
-scikit-learn
 networkx
 requests
 pydantic
+psycopg2-binary
