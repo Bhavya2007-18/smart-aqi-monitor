@@ -10,8 +10,11 @@ env/
 __pycache__/
 *.pyc
 
-# Database
-aqi_dashboard.db
+# Temporary/Internal
+smart-aqi-monitor-clean/
+verify_imports.py
+.vscode/
+pyrightconfig.json
 
 # Logs
 server_log.txt

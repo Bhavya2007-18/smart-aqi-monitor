@@ -7,4 +7,3 @@ aiofiles
 networkx
 requests
 pydantic
-psycopg2-binary
