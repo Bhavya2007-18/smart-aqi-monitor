@@ -10,6 +10,9 @@ env/
 __pycache__/
 *.pyc
 
+# Database
+*.db
+
 # Temporary/Internal
 smart-aqi-monitor-clean/
 verify_imports.py

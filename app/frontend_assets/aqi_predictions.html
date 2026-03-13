@@ -256,7 +256,9 @@
     }
 
 
-    const API_BASE = window.location.origin + '/api';
+    // 🚀 BACKEND URL — update this to your Railway deployment URL after deploying
+    const BACKEND_URL = 'https://YOUR_RAILWAY_APP.up.railway.app';
+    const API_BASE = BACKEND_URL + '/api';
     async function fetchInitialData() {
         try {
             const res = await fetch(`${API_BASE}/aqi`);

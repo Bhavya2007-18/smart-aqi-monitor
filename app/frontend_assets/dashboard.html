@@ -352,7 +352,9 @@
 
 <script>
     // Configuration
-    const API_BASE = window.location.origin + '/api';
+    // 🚀 BACKEND URL — update this to your Railway deployment URL after deploying
+    const BACKEND_URL = 'https://YOUR_RAILWAY_APP.up.railway.app';
+    const API_BASE = BACKEND_URL + '/api';
     const WS_URL = 'ws://' + window.location.host + '/ws/live-dashboard';
 
     // State

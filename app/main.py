@@ -4,8 +4,6 @@ import random
 import os
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 
 from app.database import engine, Base, SessionLocal
 from app.models import Ward
@@ -15,27 +13,25 @@ from app.api import endpoints
 async def lifespan(app: FastAPI):
     # Startup: Ensure tables and seed data
     try:
-        # Create all tables
         Base.metadata.create_all(bind=engine)
         print("Database tables verified/created.")
-        
-        # Seed Wards if empty
+
         db = SessionLocal()
         if db.query(Ward).count() == 0:
             print("Seeding initial wards...")
             wards_data = [
                 {"name": "Knowledge Park III", "lat": 28.4727, "lon": 77.4820},
-                {"name": "Pari Chowk", "lat": 28.4670, "lon": 77.5138},
-                {"name": "Alpha 1", "lat": 28.4789, "lon": 77.5020},
-                {"name": "Omega 1", "lat": 28.4550, "lon": 77.5250},
-                {"name": "Delta 1", "lat": 28.4900, "lon": 77.5150}
+                {"name": "Pari Chowk",         "lat": 28.4670, "lon": 77.5138},
+                {"name": "Alpha 1",             "lat": 28.4789, "lon": 77.5020},
+                {"name": "Omega 1",             "lat": 28.4550, "lon": 77.5250},
+                {"name": "Delta 1",             "lat": 28.4900, "lon": 77.5150},
             ]
             for w in wards_data:
                 db.add(Ward(
-                    name=w["name"], 
-                    latitude=w["lat"], 
+                    name=w["name"],
+                    latitude=w["lat"],
                     longitude=w["lon"],
-                    population_density=random.randint(5000, 20000)
+                    population_density=random.randint(5000, 20000),
                 ))
             db.commit()
             print("Seeding complete.")
@@ -43,20 +39,18 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"Startup Initialization Error: {e}")
 
-    # Background tasks (Local only)
-    if not os.environ.get("VERCEL"):
-        loop_task = asyncio.create_task(live_data_loop())
-        yield
-        loop_task.cancel()
-    else:
-        yield
+    # Start background live-data loop
+    loop_task = asyncio.create_task(live_data_loop())
+    yield
+    loop_task.cancel()
+
 
 app = FastAPI(
     title="Hyper-Local AQI & Pollution Mitigation Dashboard",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
-# CORS
+# CORS — allow requests from any origin (frontend on Vercel)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -65,24 +59,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routes
+# API routes
 app.include_router(endpoints.router, prefix="/api")
 
-# Static files and frontend
-static_path = os.path.join(os.path.dirname(__file__), "frontend_assets")
-if os.path.exists(static_path):
-    app.mount("/static", StaticFiles(directory=static_path), name="static")
 
 @app.get("/")
 async def root():
-    return FileResponse(os.path.join(static_path, "dashboard.html"))
+    return {
+        "status": "ok",
+        "service": "Hyper-Local AQI & Pollution Mitigation Dashboard API",
+        "docs": "/docs",
+    }
+
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "environment": "serverless" if os.environ.get("VERCEL") else "local"}
+    return {"status": "ok"}
+
 
 async def live_data_loop():
-    """Background simulation loop for local development."""
+    """Background simulation loop — runs continuously on Railway."""
     while True:
         try:
             db = SessionLocal()
