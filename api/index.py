@@ -21,11 +21,9 @@ except Exception as e:
             "error": "Failed to load application",
             "message": str(e),
             "traceback": traceback.format_exc(),
-            "cwd": os.getcwd(),
-            "sys_path": sys.path,
-            "dir_contents": os.listdir(os.getcwd()) if os.path.exists(os.getcwd()) else "not found"
+            "cwd": os.getcwd()
         }
 
-# This is required for Vercel's Python builder to find the ASGI app
-# when the file is named index.py inside a folder
+# For maximum Vercel compatibility, export as both 'app' and 'handler'
+app = app
 handler = app

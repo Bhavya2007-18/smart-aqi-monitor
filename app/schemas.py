@@ -1,4 +1,10 @@
-from pydantic import BaseModel, ConfigDict
+try:
+    from pydantic import BaseModel, ConfigDict
+    PYDANTIC_V2 = True
+except ImportError:
+    from pydantic import BaseModel
+    PYDANTIC_V2 = False
+
 from datetime import datetime
 from typing import Optional, List
 
@@ -11,7 +17,11 @@ class WardCreate(WardBase):
 
 class WardResponse(WardBase):
     id: int
-    model_config = ConfigDict(from_attributes=True)
+    if PYDANTIC_V2:
+        model_config = ConfigDict(from_attributes=True)
+    else:
+        class Config:
+            orm_mode = True
 
 class AQIReadingBase(BaseModel):
     ward_id: int

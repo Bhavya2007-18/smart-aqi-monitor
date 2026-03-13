@@ -28,7 +28,10 @@ app = FastAPI(title="Hyper-Local AQI Dashboard Backend")
 async def global_exception_handler(request, exc):
     print(f"CRITICAL ERROR: {exc}")
     try:
-        return FileResponse(os.path.join(frontend_path, "dashboard.html"))
+        # Fallback for Vercel
+        if os.path.exists(os.path.join(frontend_path, "dashboard.html")):
+             return FileResponse(os.path.join(frontend_path, "dashboard.html"))
+        return {"error": "Internal Server Error", "detail": str(exc)}
     except Exception:
         return {"error": "Internal Server Error", "detail": str(exc)}
 
@@ -41,7 +44,10 @@ app.add_middleware(
 )
 
 app.include_router(endpoints.router, prefix="/api")
-app.include_router(websockets.router, prefix="/ws")
+
+# Only include websockets if not on Vercel
+if not os.environ.get("VERCEL"):
+    app.include_router(websockets.router, prefix="/ws")
 
 try:
     if os.path.exists(frontend_path):
@@ -142,35 +148,37 @@ async def live_data_loop():
 
 @app.on_event("startup")
 async def startup_event():
-    try:
-        # Initialize DB (creates tables if they don't exist)
-        Base.metadata.create_all(bind=engine)
-        
-        # Insert Greater Noida Wards if db is empty
-        db = SessionLocal()
-        if db.query(Ward).count() == 0:
-            wards_data = [
-                {"name": "Knowledge Park III", "lat": 28.4727, "lon": 77.4820},
-                {"name": "Pari Chowk", "lat": 28.4670, "lon": 77.5138},
-                {"name": "Alpha 1", "lat": 28.4789, "lon": 77.5020},
-                {"name": "Omega 1", "lat": 28.4550, "lon": 77.5250},
-                {"name": "Delta 1", "lat": 28.4900, "lon": 77.5150}
-            ]
-            for w in wards_data:
-                db.add(Ward(
-                    name=w["name"], 
-                    latitude=w["lat"], 
-                    longitude=w["lon"],
-                    population_density=random.randint(5000, 20000)
-                ))
-            db.commit()
-        db.close()
-    except Exception as e:
-        print(f"Startup DB Error: {e}")
-    
-    # Start the live data loop in the background (only if not on Vercel)
+    # Only run full initialization if NOT on Vercel
+    # Vercel needs to be incredibly fast to avoid Cold Start timeouts
     if not os.environ.get("VERCEL"):
-        asyncio.create_task(live_data_loop())
-        print("Background live data tracking started.")
+        try:
+            # Initialize DB (creates tables if they don't exist)
+            Base.metadata.create_all(bind=engine)
+            
+            # Insert Greater Noida Wards if db is empty
+            db = SessionLocal()
+            if db.query(Ward).count() == 0:
+                wards_data = [
+                    {"name": "Knowledge Park III", "lat": 28.4727, "lon": 77.4820},
+                    {"name": "Pari Chowk", "lat": 28.4670, "lon": 77.5138},
+                    {"name": "Alpha 1", "lat": 28.4789, "lon": 77.5020},
+                    {"name": "Omega 1", "lat": 28.4550, "lon": 77.5250},
+                    {"name": "Delta 1", "lat": 28.4900, "lon": 77.5150}
+                ]
+                for w in wards_data:
+                    db.add(Ward(
+                        name=w["name"], 
+                        latitude=w["lat"], 
+                        longitude=w["lon"],
+                        population_density=random.randint(5000, 20000)
+                    ))
+                db.commit()
+            db.close()
+            
+            # Start background loop
+            asyncio.create_task(live_data_loop())
+            print("Background live data tracking started.")
+        except Exception as e:
+            print(f"Startup Error: {e}")
     else:
-        print("Running in Serverless mode (Vercel). Background tasks disabled.")
+        print("Running in Serverless mode (Vercel). Initialization skipped.")
