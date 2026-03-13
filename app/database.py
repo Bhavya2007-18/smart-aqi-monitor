@@ -13,7 +13,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("database_manager")
 
 # 1. Load DATABASE_URL from environment with fallback
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///aqi_dashboard.db")
+# On Vercel, if no DB is provided, we use an in-memory sqlite to prevent read-only filesystem crashes
+default_db = "sqlite:///:memory:" if os.environ.get("VERCEL") else "sqlite:///aqi_dashboard.db"
+DATABASE_URL = os.getenv("DATABASE_URL", default_db)
 
 # 3. Ensure compatibility with SQLAlchemy 1.4+ for postgres:// prefix (often used by Heroku/Supabase/Neon)
 if DATABASE_URL.startswith("postgres://"):
@@ -43,7 +45,9 @@ try:
         logger.info(f"Successfully connected to the database at {safe_url}")
 except Exception as err:
     logger.error(f"Failed to connect to the database: {str(err)}")
-    raise Exception("Database connection failed. Please check your DATABASE_URL.")
+    # We create a dummy engine to allow the app to boot, though it will fail on DB queries
+    # This helps diagnose if the crash is at the import level
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
 
 # 6. Update session creation logic for async-safe serverless execution
 session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
