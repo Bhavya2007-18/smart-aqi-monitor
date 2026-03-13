@@ -302,8 +302,10 @@
     }
 
 
-    // 🚀 BACKEND URL — update this to your Railway deployment URL after deploying
-    const BACKEND_URL = 'https://YOUR_RAILWAY_APP.up.railway.app';
+    // 🚀 BACKEND URL — Detects localhost automatically, update placeholder for Railway deploy
+    const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://localhost:8000' 
+        : 'https://YOUR_RAILWAY_APP.up.railway.app';
     const API_BASE = BACKEND_URL + '/api';
     async function fetchInitialData() {
         try {

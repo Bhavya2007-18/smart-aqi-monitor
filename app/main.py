@@ -4,6 +4,8 @@ import random
 import os
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from app.database import engine, Base, SessionLocal
 from app.models import Ward
@@ -62,9 +64,17 @@ app.add_middleware(
 # API routes
 app.include_router(endpoints.router, prefix="/api")
 
+# Static files and frontend hosting
+static_path = os.path.join(os.path.dirname(__file__), "frontend_assets")
+if os.path.exists(static_path):
+    app.mount("/static", StaticFiles(directory=static_path), name="static")
 
 @app.get("/")
 async def root():
+    # If the file exists, serve it. Otherwise return JSON
+    dash_path = os.path.join(static_path, "dashboard.html")
+    if os.path.exists(dash_path):
+        return FileResponse(dash_path)
     return {
         "status": "ok",
         "service": "Hyper-Local AQI & Pollution Mitigation Dashboard API",
