@@ -55,18 +55,7 @@ SessionLocal = scoped_session(session_factory)
 
 Base = declarative_base()
 
-# 7. Add automatic table creation on application startup if tables do not exist
-def init_db():
-    try:
-        import app.models # Ensure models are loaded
-        Base.metadata.create_all(bind=engine)
-        logger.info("Database tables automatically verified and created if missing.")
-    except Exception as e:
-        logger.error(f"Failed to auto-create tables: {str(e)}")
-
-# Trigger automatic table creation on startup
-init_db()
-
+# Note: DB Table creation is handled in main.py's startup_event to avoid circular imports
 def get_db():
     db = SessionLocal()
     try:
