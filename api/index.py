@@ -20,7 +20,10 @@ except Exception as e:
         return {
             "error": "Failed to load application",
             "message": str(e),
-            "traceback": traceback.format_exc()
+            "traceback": traceback.format_exc(),
+            "cwd": os.getcwd(),
+            "sys_path": sys.path,
+            "dir_contents": os.listdir(os.getcwd()) if os.path.exists(os.getcwd()) else "not found"
         }
 
 # This is required for Vercel's Python builder to find the ASGI app
