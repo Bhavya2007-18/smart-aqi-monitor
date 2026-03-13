@@ -217,3 +217,77 @@ def get_city_score(db: Session):
         "city_score": round(score, 2),
         "rating": rating
     }
+
+def get_pollution_source_detection(db: Session, ward_name: str):
+    """
+    Feature: Pollution Source Detection Engine (Heuristic Analysis)
+    Estimates probable sources during an AQI spike (>150) without using heavy ML libraries.
+    """
+    ward = db.query(Ward).filter(Ward.name.ilike(f"%{ward_name}%")).first()
+    if not ward:
+        return {"ward": ward_name, "aqi": 0, "sources": []}
+        
+    latest_aqi = db.query(AQIReading).filter(AQIReading.ward_id == ward.id).order_by(AQIReading.timestamp.desc()).first()
+    current_aqi = latest_aqi.aqi_value if latest_aqi else 50.0
+    
+    # If AQI is low, skip deep analysis
+    if current_aqi <= 150:
+        return {
+            "ward": ward.name,
+            "aqi": current_aqi,
+            "sources": [{"type": "Background Levels", "probability": 1.0}]
+        }
+        
+    # Gather heuristic markers
+    latest_traffic = db.query(TrafficData).filter(TrafficData.ward_id == ward.id).order_by(TrafficData.timestamp.desc()).first()
+    traffic_index = latest_traffic.traffic_density if latest_traffic else 0.4
+    
+    # Base probability unnormalized weights
+    weight_vehicle = 10.0
+    weight_construction = 5.0
+    weight_industrial = 2.0
+    weight_biomass = 1.0
+    
+    # 1. Traffic Congestion Logic
+    if traffic_index > 0.7:
+        weight_vehicle *= 3.5 # Heavy traffic multiplier
+    elif traffic_index > 0.85:
+        weight_vehicle *= 5.0 # Standstill multiplier
+        
+    # 2. Construction Proximity Logic (Simulated via recent specific sources)
+    recent_sources = db.query(PollutionSource).filter(PollutionSource.ward_id == ward.id).order_by(PollutionSource.timestamp.desc()).limit(10).all()
+    has_construction = any(s.source_type == "construction_dust" for s in recent_sources)
+    if has_construction:
+        weight_construction *= 4.0
+        
+    # 3. Wind & Industrial Zone Proximity (Simulated via specific ward identifiers representing industrial zones)
+    industrial_wards = ["Knowledge Park III", "Ecotech", "Phase 2"]
+    if any(iw in ward.name for iw in industrial_wards):
+        weight_industrial *= 6.0
+    else:
+        # Simulate wind blowing from industrial sector occasionally
+        wind_from_industrial = random.random() > 0.7
+        if wind_from_industrial:
+            weight_industrial *= 3.0
+            
+    # Normalize probabilities to sum to 1.0
+    total_weight = weight_vehicle + weight_construction + weight_industrial + weight_biomass
+    
+    res = [
+        {"type": "Vehicle Emissions", "probability": round(weight_vehicle / total_weight, 2)},
+        {"type": "Construction Dust", "probability": round(weight_construction / total_weight, 2)},
+        {"type": "Industrial Smoke", "probability": round(weight_industrial / total_weight, 2)}
+    ]
+    
+    # Sort descending by probability
+    res.sort(key=lambda x: x["probability"], reverse=True)
+    
+    # Ensure they exactly equal 1.0 due to rounding
+    diff = 1.0 - sum(s["probability"] for s in res)
+    res[0]["probability"] = round(res[0]["probability"] + diff, 2)
+    
+    return {
+        "ward": ward.name,
+        "aqi": round(current_aqi),
+        "sources": res
+    }

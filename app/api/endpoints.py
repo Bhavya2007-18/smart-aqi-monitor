@@ -7,7 +7,8 @@ from app.schemas import (
     MitigationActionResponse, AQIPrediction, HotspotResponse, PollutionEvent,
     HealthRiskResponse, SourceProbabilityResponse, MitigationSimulationRequest,
     MitigationSimulationResponse, WardRanking, PollutionSpreadResponse,
-    EmergencyStatusResponse, TrendIntelligenceResponse, CityScoreResponse
+    EmergencyStatusResponse, TrendIntelligenceResponse, CityScoreResponse,
+    PollutionSourceDetectionResponse
 )
 from app.services.prediction import predict_aqi
 from app.services.routing import optimize_routes
@@ -86,6 +87,10 @@ def get_health_risks(db: Session = Depends(get_db)):
 @router.get("/source-analysis", response_model=list[SourceProbabilityResponse])
 def get_source_analysis(db: Session = Depends(get_db)):
     return analytics.get_source_probability(db)
+
+@router.get("/pollution-source-analysis", response_model=PollutionSourceDetectionResponse)
+def get_pollution_source_detection(ward: str, db: Session = Depends(get_db)):
+    return analytics.get_pollution_source_detection(db, ward)
 
 @router.post("/simulate-mitigation", response_model=MitigationSimulationResponse)
 def simulate_mitigation(req: MitigationSimulationRequest, db: Session = Depends(get_db)):

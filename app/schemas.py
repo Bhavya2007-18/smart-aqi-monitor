@@ -84,6 +84,15 @@ class SourceProbabilityResponse(BaseModel):
     ward_id: int
     source_probability: dict # { "traffic_emission": 0.48, ... }
 
+class PollutionSourceDetail(BaseModel):
+    type: str # "Vehicle Emissions", "Construction Dust", etc
+    probability: float
+
+class PollutionSourceDetectionResponse(BaseModel):
+    ward: str
+    aqi: float
+    sources: List[PollutionSourceDetail]
+
 class MitigationSimulationRequest(BaseModel):
     ward_id: int
     action: str

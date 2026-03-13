@@ -509,27 +509,60 @@
                 fillOpacity: 0.8
             });
 
-            // Add popup
-            const popupContent = `
-                <div class="px-2 py-1">
-                    <h4 class="font-bold text-lg mb-1">${ward.name}</h4>
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="px-2 py-1 rounded text-xs font-bold text-white shadow" style="background-color: ${color}">AQI: ${aqi}</span>
-                        <span class="text-xs text-slate-300">Dominant: PM2.5</span>
-                    </div>
-                    <p class="text-xs text-brand-accent mt-2 font-semibold">AI Recommendation:</p>
-                    <p class="text-[10px] text-slate-300 leading-tight">${getMitigation(aqi)}</p>
+            // Base popup container with a loading spinner for the sources
+            const popupContainer = document.createElement('div');
+            popupContainer.className = 'px-2 py-1 min-w-[200px] text-left';
+            popupContainer.innerHTML = `
+                <h4 class="font-bold text-lg mb-1">${ward.name}</h4>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="px-2 py-1 rounded text-xs font-bold text-white shadow" style="background-color: ${color}">AQI: ${aqi}</span>
                 </div>
+                <!-- Dynamic Source Container -->
+                <div class="source-container mt-2 min-h-[50px]">
+                    <p class="text-[10px] text-slate-400 italic">Analyzing probable sources...</p>
+                </div>
+                <p class="text-xs text-brand-accent mt-3 font-semibold">AI Recommendation:</p>
+                <p class="text-[10px] text-slate-300 leading-tight">${getMitigation(aqi)}</p>
             `;
             
-            circle.bindPopup(popupContent, { maxWidth: 220 });
+            circle.bindPopup(popupContainer, { maxWidth: 260 });
             
-            // Add click event to sync with sidebar ward card
-            circle.on('click', () => {
+            // Add click event to fetch extended data using the NEW pollution-source-analysis endpoint
+            circle.on('click', async () => {
                 selectedWardId = ward.id;
                 const selector = document.querySelector('select');
                 if (selector) selector.value = ward.id;
                 updateWardCard(ward.id);
+                
+                // Fetch Source Detection Analysis
+                try {
+                    const sourceRes = await fetch(`${API_BASE}/pollution-source-analysis?ward=${encodeURIComponent(ward.name)}`);
+                    const sourceData = await sourceRes.json();
+                    
+                    const srcDiv = popupContainer.querySelector('.source-container');
+                    if (sourceData && sourceData.sources && sourceData.sources.length > 0) {
+                        const topSrc1 = sourceData.sources[0];
+                        const topSrc2 = sourceData.sources[1]; // Get top 2
+                        
+                        srcDiv.innerHTML = `
+                            <p class="text-[10px] text-slate-300 font-semibold mb-1 border-b border-slate-600 pb-1">Detected Pollutants:</p>
+                            <div class="flex flex-col gap-1">
+                                <div class="flex justify-between items-center bg-slate-800 rounded px-1.5 py-1">
+                                    <span class="text-[10px] font-medium text-red-400">${topSrc1.type}</span>
+                                    <span class="text-[10px] text-white font-bold">${Math.round(topSrc1.probability * 100)}%</span>
+                                </div>
+                                <div class="flex justify-between items-center bg-slate-800/50 rounded px-1.5 py-1">
+                                    <span class="text-[10px] font-medium text-orange-300">${topSrc2.type}</span>
+                                    <span class="text-[10px] text-white font-bold">${Math.round(topSrc2.probability * 100)}%</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        srcDiv.innerHTML = `<p class="text-[10px] text-slate-400">Sources normal.</p>`;
+                    }
+                } catch(e) {
+                    console.error("Source Analysis fetch failed:", e);
+                }
             });
 
             circle.addTo(markersLayer);
