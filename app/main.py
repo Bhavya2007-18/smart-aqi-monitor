@@ -149,39 +149,41 @@ async def live_data_loop():
             db.close()
             
 
-@app.on_event("startup")
-async def startup_event():
-    # Only run full initialization if NOT on Vercel
-    # Vercel needs to be incredibly fast to avoid Cold Start timeouts
+    # Create tables and seed data if empty
+    try:
+        # Tables
+        Base.metadata.create_all(bind=engine)
+        
+        # Seed Wards
+        db = SessionLocal()
+        if db.query(Ward).count() == 0:
+            print("Seeding initial wards...")
+            wards_data = [
+                {"name": "Knowledge Park III", "lat": 28.4727, "lon": 77.4820},
+                {"name": "Pari Chowk", "lat": 28.4670, "lon": 77.5138},
+                {"name": "Alpha 1", "lat": 28.4789, "lon": 77.5020},
+                {"name": "Omega 1", "lat": 28.4550, "lon": 77.5250},
+                {"name": "Delta 1", "lat": 28.4900, "lon": 77.5150}
+            ]
+            for w in wards_data:
+                db.add(Ward(
+                    name=w["name"], 
+                    latitude=w["lat"], 
+                    longitude=w["lon"],
+                    population_density=random.randint(5000, 20000)
+                ))
+            db.commit()
+            print("Seeding complete.")
+        db.close()
+    except Exception as e:
+        print(f"Startup DB Error: {e}")
+
+    # Background loop (Only if NOT on Vercel)
     if not os.environ.get("VERCEL"):
         try:
-            # Initialize DB (creates tables if they don't exist)
-            Base.metadata.create_all(bind=engine)
-            
-            # Insert Greater Noida Wards if db is empty
-            db = SessionLocal()
-            if db.query(Ward).count() == 0:
-                wards_data = [
-                    {"name": "Knowledge Park III", "lat": 28.4727, "lon": 77.4820},
-                    {"name": "Pari Chowk", "lat": 28.4670, "lon": 77.5138},
-                    {"name": "Alpha 1", "lat": 28.4789, "lon": 77.5020},
-                    {"name": "Omega 1", "lat": 28.4550, "lon": 77.5250},
-                    {"name": "Delta 1", "lat": 28.4900, "lon": 77.5150}
-                ]
-                for w in wards_data:
-                    db.add(Ward(
-                        name=w["name"], 
-                        latitude=w["lat"], 
-                        longitude=w["lon"],
-                        population_density=random.randint(5000, 20000)
-                    ))
-                db.commit()
-            db.close()
-            
-            # Start background loop
             asyncio.create_task(live_data_loop())
             print("Background live data tracking started.")
         except Exception as e:
-            print(f"Startup Error: {e}")
+            print(f"Background Loop Error: {e}")
     else:
-        print("Running in Serverless mode (Vercel). Initialization skipped.")
+        print("Running in Serverless mode (Vercel). Real-time background loop skipped.")
