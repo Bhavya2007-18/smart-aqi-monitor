@@ -1,18 +1,14 @@
 {
-  "github": {
-    "silent": true
-  },
-  "rewrites": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/api/index.py"
+      "src": "api/index.py",
+      "use": "@vercel/python"
     }
   ],
-  "functions": {
-    "api/index.py": {
-      "runtime": "python3.11",
-      "memory": 1024,
-      "maxDuration": 10
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
     }
-  }
+  ]
 }
