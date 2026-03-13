@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 import os
 
 from app.database import engine, Base, SessionLocal
-from app.api import endpoints, websockets
+from app.api import endpoints
 from app.models import Ward # To ensure tables are created
 
 # Core modules
@@ -47,6 +47,7 @@ app.include_router(endpoints.router, prefix="/api")
 
 # Only include websockets if not on Vercel
 if not os.environ.get("VERCEL"):
+    from app.api import websockets
     app.include_router(websockets.router, prefix="/ws")
 
 try:
@@ -116,11 +117,13 @@ async def live_data_loop():
             
             # Broadcast Traffic Updates
             if new_traffic:
+                from app.api import websockets
                 data = [{"ward_id": t.ward_id, "vehicle_count": t.vehicle_count, "density": t.traffic_density} for t in new_traffic]
                 await websockets.manager.broadcast({"type": "traffic_update", "data": data})
 
             # Every 2nd tick (60s): Update AQI, Pollution, Mitigations
-            if tick % 2 == 0:
+            if int(tick) % 2 == 0:
+                from app.api import websockets
                 new_pollution = pollution.simulate_pollution_detections(db)
                 new_aqi = await aqi.update_live_aqi(db)
                 new_mitigations = reinforcement.generate_mitigations(db)
