@@ -71,18 +71,36 @@ if os.path.exists(static_path):
 
 @app.get("/")
 async def root():
-    # If the file exists, serve it. Otherwise return JSON
     dash_path = os.path.join(static_path, "dashboard.html")
     if os.path.exists(dash_path):
         return FileResponse(dash_path)
-    return {
-        "status": "ok",
-        "service": "Hyper-Local AQI & Pollution Mitigation Dashboard API",
-        "docs": "/docs",
-    }
+    return {"status": "ok", "service": "API", "docs": "/docs"}
 
+@app.get("/pollution")
+async def pollution_page():
+    return FileResponse(os.path.join(static_path, "pollution_sources.html"))
+
+@app.get("/traffic")
+async def traffic_page():
+    return FileResponse(os.path.join(static_path, "traffic_simulation.html"))
+
+@app.get("/predictions")
+async def predictions_page():
+    return FileResponse(os.path.join(static_path, "aqi_predictions.html"))
+
+@app.get("/policy")
+async def policy_page():
+    return FileResponse(os.path.join(static_path, "policy_engine.html"))
 
 @app.get("/health")
+async def health_page():
+    return FileResponse(os.path.join(static_path, "citizen_health.html"))
+
+@app.get("/analytics")
+async def analytics_page():
+    return FileResponse(os.path.join(static_path, "environmental_analytics.html"))
+
+@app.get("/api-status")
 async def health_check():
     return {"status": "ok"}
 

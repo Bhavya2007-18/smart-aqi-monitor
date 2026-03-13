@@ -1,6 +1,13 @@
 {
   "outputDirectory": "app/frontend_assets",
   "rewrites": [
+    { "source": "/", "destination": "/dashboard.html" },
+    { "source": "/pollution", "destination": "/pollution_sources.html" },
+    { "source": "/traffic", "destination": "/traffic_simulation.html" },
+    { "source": "/predictions", "destination": "/aqi_predictions.html" },
+    { "source": "/policy", "destination": "/policy_engine.html" },
+    { "source": "/health", "destination": "/citizen_health.html" },
+    { "source": "/analytics", "destination": "/environmental_analytics.html" },
     { "source": "/(.*)", "destination": "/$1" }
   ],
   "headers": [
