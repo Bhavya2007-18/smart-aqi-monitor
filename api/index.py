@@ -1,15 +1,15 @@
-import os
 import sys
+import os
 import traceback
+from pathlib import Path
 
-# Ensure project root is in path
-path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if path not in sys.path:
-    sys.path.insert(0, path)
+# Modern path resolution for Vercel
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 try:
     from app.main import app
 except Exception as e:
+    # Error Handler for Fast Debugging (Point 8 of Audit)
     print(f"Error importing app.main: {e}")
     traceback.print_exc()
     from fastapi import FastAPI
@@ -24,6 +24,5 @@ except Exception as e:
             "cwd": os.getcwd()
         }
 
-# For maximum Vercel compatibility, export as both 'app' and 'handler'
-app = app
+# Standard exports for Vercel
 handler = app
