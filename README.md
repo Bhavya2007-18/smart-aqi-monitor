@@ -8,7 +8,7 @@ This project builds a hyper-local air pollution monitoring and response system c
 
 The platform combines geospatial visualization, machine learning, traffic simulation, and real-time dashboards to create a smart city pollution command center.
 
-Project Overview
+Project Overview==
 
 The system collects simulated traffic data and pollution signals, analyzes their impact on air quality, and presents insights through an interactive dashboard.
 
